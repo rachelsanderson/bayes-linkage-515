@@ -1,9 +1,10 @@
 import numpy as np
 import pandas as pd
+import json
+import sys
 
-dir = '/Users/rachelanderson/Desktop/Research/Anderson_TermPaper_515'
-inputDir = dir + '/Code/Input/'
-outputDir = dir + '/Code/Output/'
+dir = '.'
+inputDir = dir + '/Input/'
 
 ### returns true BPM and Gamma matrix for calculations
 def make_Gamma(pM, pML, pUL, n1, n2, L):
@@ -17,12 +18,6 @@ def make_Gamma(pM, pML, pUL, n1, n2, L):
 
     # make actual comparison vectors
     Gamma['gamma'] = Gamma['match'].apply((lambda x: make_gamma(pML,pUL,x)))
-
-    # Save it for future analysis
-    gammaName = 'Gamma_nM' + str(int(pM*n2)) + '_L' + str(L) + '.csv'
-    Zname = 'Ztrue_nM' + str(int(pM*n2)) + '_L' + str(L) + '.csv'
-    Gamma.to_csv(inputDir+gammaName, mode='w')
-    pd.DataFrame(Z).to_csv(inputDir+Zname, mode='w')
 
     return Z, Gamma
 
@@ -60,3 +55,27 @@ def make_gamma(pML, pUL, x):
         return np.random.binomial(1,pML, size=L)
     else:
         return np.random.binomial(1,pUL, size=L)
+
+## CALL THIS FROM THE COMMAND LINE:
+
+if __name__ == "__main__":
+    filename = sys.argv[1]
+    with open(filename, 'r') as f:
+        params = json.load(f)
+
+    # read in params
+    L= params['L']
+    n1 = params['n1']
+    n2 = params['n2']
+    pML = params['pML']
+    pUL = params['pUL']
+    pM = params['pM']
+
+    Z_true, Gamma = make_Gamma(pM, pML, pUL, n1, n2, L)
+
+    # Save it for future analysis
+    ext = sys.argv[2]
+    gammaName = 'Gamma_' + ext + '.csv'
+    Zname = 'Ztrue_' + ext + '.csv'
+    Gamma.to_csv(inputDir+gammaName, mode='w')
+    pd.DataFrame(Z_true).to_csv(inputDir+Zname, mode='w')

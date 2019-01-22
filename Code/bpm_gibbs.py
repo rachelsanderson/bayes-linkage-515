@@ -10,10 +10,10 @@ import json
 import time
 import sys
 
-dir = '/Users/rachelanderson/Desktop/Research/Anderson_TermPaper_515'
+dir = '.'
 dataDir = dir + '/Data'
 inputDir = dataDir + '/Input'
-outputDir = dir + '/Code/Output/'
+outputDir = dir + '/Output/'
 
 def make_Z_init(n1,n2):
     Z = [n1 + i for i in range(n2)]
@@ -394,6 +394,7 @@ def gibbs(Gamma, iters, init, hypers, Z_init, n1, n2):
 
         # 2. Draw pML | Z, pUL | Z
         gamma = Gamma['gamma']
+        print(Gamma['gamma'])
         pML = sample_pML(state, hypers['aML'], hypers['bML'])
         pUL = sample_pUL(state, hypers['aUL'], hypers['bUL'])
 
@@ -419,7 +420,7 @@ def gibbs(Gamma, iters, init, hypers, Z_init, n1, n2):
     return trace, Z_trace
 
 def main():
-    niters = int(sys.argv[2])
+    niters = int(sys.argv[3])
     assert niters > 0, 'need positive niters'
     assert len(Z_init) > 0, 'invalid param'
     check_valid_prior(init)
@@ -439,6 +440,7 @@ if __name__ == "__main__":
     with open(filename, 'r') as f:
         params = json.load(f)
 
+    Gamma = pd.read_csv(sys.argv[2])
     # read in params
     L= params['L']
     init = params['init']
@@ -449,8 +451,8 @@ if __name__ == "__main__":
     pUL = params['pUL']
     pM = params['pM']
 
-    # using actual params, generate fake data
-    Z_true, Gamma = gen_data.make_Gamma(pM, pML, pUL, n1, n2, L)
+    # # using actual params, generate fake data
+    # Z_true, Gamma = gen_data.make_Gamma(pM, pML, pUL, n1, n2, L)
 
     #perform gibbs sampling
     Z_init = make_Z_init(n1,n2)

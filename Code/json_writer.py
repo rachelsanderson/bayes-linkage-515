@@ -1,11 +1,10 @@
 import json
 import sys
 
-dir = '/Users/rachelanderson/Desktop/Research/Anderson_TermPaper_515'
-inputDir = dir + '/Code/Input/'
-outputDir = dir + '/Code/Output/'
+dir = '.'
+inputDir = dir + '/Input/'
 
-def write_params(L,n1,n2,pM,pML,pUL):
+def write_params(ext, L,n1,n2,pM,pML,pUL):
     params = {}
     params['L'] = L
     params['init'] = {"pM": 0.5,
@@ -23,17 +22,18 @@ def write_params(L,n1,n2,pM,pML,pUL):
     params['pML'] = [pML] * L
     params['pUL'] = [pUL] * L
 
-    fileName = inputDir + 'param_nMatch' + str(int(pM*n2)) + '_L' + str(L) + '.json'
+    fileName = inputDir + 'param_' + ext + '.json'
 
     with open(fileName,'w') as outfile:
         json.dump(params,outfile)
     return fileName
 
 if __name__ == '__main__':
-    L  = int(sys.argv[1])
-    n1 = int(sys.argv[2])
-    n2 = int(sys.argv[3])
-    pM = float(sys.argv[4])
-    pML = float(sys.argv[5])
-    pUL = float(sys.argv[6])
-    write_params(L,n1,n2,pM,pML,pUL)
+    ext = sys.argv[1]
+    L  = int(sys.argv[2])
+    n1 = int(sys.argv[3])
+    n2 = int(sys.argv[4])
+    pM = float(sys.argv[5])
+    pML = float(sys.argv[6])
+    pUL = float(sys.argv[7])
+    write_params(ext,L,n1,n2,pM,pML,pUL)
