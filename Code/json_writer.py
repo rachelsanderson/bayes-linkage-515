@@ -23,7 +23,7 @@ def write_params(L,n1,n2,pM,pML,pUL):
     params['pML'] = [pML] * L
     params['pUL'] = [pUL] * L
 
-    fileName = inputDir + 'param_nMatch' + str(int(pM*n1*n2)) + '_L' + str(L) + '.json'
+    fileName = inputDir + 'param_nMatch' + str(int(pM*n2)) + '_L' + str(L) + '.json'
 
     with open(fileName,'w') as outfile:
         json.dump(params,outfile)

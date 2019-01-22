@@ -18,6 +18,30 @@ python something here
 
 One Paragraph of project description goes here
 
+## Running code on the Adroit cluster
+
+First, do this locally (may require Duo verification and entering password)
+
+```
+scp bpm_gibbs.py json_writer.py gen_data.py NET_ID@adroit.princeton.edu:~
+```
+
+Then ssh into the cluster by typing in
+
+```
+ssh NET_ID@adroit.princeton.edu
+```
+To run the code on the cluster, type:
+```
+# loads modules for scipy, etc.
+module load python
+module load anaconda3/5.3.1
+```
+and then follow the steps above.
+
+## SLURM on the cloud
+
+My code includes a number of slurm files (suffix .sh) which can be used to submit batches to the cluster.  I use this for my large computations.
 
 ## Authors
 

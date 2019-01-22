@@ -46,9 +46,9 @@ def check_valid_prior(init):
     assert (0 not in init['pUL']) and (1 not in init['pUL']), 'elements of pML must be b/w 0,1'
     return
 
-def make_file_names(nPair, L):
-    zName = 'Z_trace_nPair' + str(n1*n2) + '_L' + str(L)
-    traceName = 'trace_nPair' + str(n1*n2) + '_L' + str(L)
+def make_file_names(pM, n2, L):
+    zName = 'Z_trace_nM' + str(int(pM*n2)) + '_L' + str(L)
+    traceName = 'trace_nM' + str(int(pM*n2)) + '_L' + str(L)
     return (zName, traceName)
 
 def sample_pM(s, aM, bM):
@@ -427,8 +427,9 @@ def main():
     start = time.time()
     trace, Z_trace = gibbs(Gamma, niters, init, hypers, Z_init, n1, n2)
     end = time.time()
-    print(end-start)
-    zName, traceName = make_file_names(Gamma.shape[0], L)
+    print('Time to perform ' + str(niters) + ' for ' + str(n1*n2) + ' pairs, L = '\
+        + str(L) + ' is ' + str(round(end-start,3)) + ' seconds')
+    zName, traceName = make_file_names(pM, n2, L)
     Z_trace.to_csv(outputDir + zName+'.csv', mode='w')
     trace.to_csv(outputDir + traceName+'.csv', mode='w')
 

@@ -2,9 +2,8 @@ import numpy as np
 import pandas as pd
 
 dir = '/Users/rachelanderson/Desktop/Research/Anderson_TermPaper_515'
-dataDir = dir + '/Data'
-inputDir = dataDir + '/Input'
-outputDir = dataDir + '/Output'
+inputDir = dir + '/Code/Input/'
+outputDir = dir + '/Code/Output/'
 
 ### returns true BPM and Gamma matrix for calculations
 def make_Gamma(pM, pML, pUL, n1, n2, L):
@@ -20,8 +19,8 @@ def make_Gamma(pM, pML, pUL, n1, n2, L):
     Gamma['gamma'] = Gamma['match'].apply((lambda x: make_gamma(pML,pUL,x)))
 
     # Save it for future analysis
-    gammaName = 'Gamma_nM' + str(int(pM*n1*n2)) + '_L' + str(L) + '.csv'
-    Zname = 'Ztrue_nM' + str(int(pM*n1*n2)) + '_L' + str(L) + '.csv'
+    gammaName = 'Gamma_nM' + str(int(pM*n2)) + '_L' + str(L) + '.csv'
+    Zname = 'Ztrue_nM' + str(int(pM*n2)) + '_L' + str(L) + '.csv'
     Gamma.to_csv(inputDir+gammaName, mode='w')
     pd.DataFrame(Z).to_csv(inputDir+Zname, mode='w')
 
