@@ -7,6 +7,7 @@
 \usepackage{amssymb}
 \usepackage{epstopdf}
 \usepackage{natbib}
+\usepackage[nomarkers,nolists,figuresonly]{endfloat}
 \usepackage{booktabs}
 
 \DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
@@ -14,6 +15,7 @@
 \newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
 \newcommand\gamij{\mathbf{\gamma_{ij}}}
 \def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
+\newcommand\params{(p_M, p_{M\ell}, p_{U\ell})}
 
 \title{Bayesian Record Linkage}
 \author{Rachel Anderson}
@@ -215,15 +217,15 @@ $$Pr(Z\ |\ \alpha_M, \beta_M) = \frac{(n_1-n_{12}(Z))!}{n_1!}\frac{\text{Beta}(n
 The only difference is step 3.  We no longer draw matches according to $n_1\times n_2$ independent Bernoulli random variables.  The procedure used in this paper is exactly that from the appendix of Larsen (2005).  It is quite long, so see Appendix for details. 
 
 
-\section{Testing the methods and results}
+\section{Data and Simulations}
 
-I wrote Python scripts that implement Gibbs sampling for the mixture model- and bipartite matching-based approaches to record linkage.  I test them on fake data with different parameters and compare the results.
+I wrote Python scripts that implement Gibbs sampling for the mixture model- and bipartite matching-based approaches to record linkage.  I test them on fake data with different parameters and compare the results.   Documentation is available in \texttt{README.md}. 
 \begin{table}[h!]
 \caption{Parameter combinations and time to perform 100,000 iterations (in seconds)}
 \begin{center}
 \begin{tabular}{cccccc|cc}
 \toprule
- $L$ &  $n_1$ &  $n_2$ &  $p_M$ &  $p_{ML}$ &  $p_{UL}$ & MM & BPM \\
+ $L$ &  $n_1$ &  $n_2$ &  $p_M$ &  $p_{M\ell}$ &  $p_{U\ell}$ & MM & BPM \\
 \midrule
  2 &  10 &  10 &  0.2 &  0.9 &  0.2 & 237 & 4174 \\
  3 &  10 &  10 &  0.2 &  0.9 &  0.2 & 292 & 4315 \\
@@ -240,18 +242,107 @@ I wrote Python scripts that implement Gibbs sampling for the mixture model- and 
 \bottomrule
 \end{tabular}
 \end{center}
-\label{default}
+\label{params}
 \end{table}%
 
 \subsection{Data}
 
-\subsection{More prior restrictions}
+For each combination of $(L, n_1, n_2, p_M, p_{M\ell}, p_{U\ell})$, in Table \ref{params}, I randomly selected $n_M = p_M n_2$ records from $X_2$ and $n_M$ records from $X_1$ and assigned them as matches.  For these record pairs, I generated $\gamij$ according to
+ $$\gamma_{ij}^{\ell} \ | \ M \overset{i.i.d.}{\sim}\text{Bernoulli}(p_{M\ell}), \hspace{10pt}\ell = 1,\dots L$$ 
+For the remaining $(n_1n_2 - n_M)$ record pairs, I generated $\gamij$ from
+  $$\gamma_{ij}^{\ell} \ | \ U \overset{i.i.d.}{\sim}\text{Bernoulli}(p_{U\ell}), \hspace{10pt}\ell = 1,\dots L$$ 
+
+For the results presented here, I test $p_{M\ell} = 0.9$ and $p_{U\ell}=0.2$ for all $\ell$, however my programs also allow flexible choices.
+
+\subsection{Priors}
+
+I use a flat prior for all parameters ($\alpha_M=\beta_M=\alpha_{M\ell}=\beta_{M\ell}=\alpha_{U\ell}=\beta_{U\ell}=1$).  However, these are also flexible.  %TO DO (jupyter notebook?)  Some small scale simulations showed that my results were extremely sensitive/not sensitive to piror. 
+
+
+\section{Results}
+
+For each dataset, I perform Gibbs sampling according to the Mixture Modeling and Beta Record linkage approaches.  Here is what I find
+
+I use burn-in = 2000 but the results are generally robust to larger burn-in.
+
+\subsection{Mixture Model} 
+
+For each parameter combination tested, the posterior densities and trace plots for $(p_{M1}, \dots, p_{ML})$ and $(p_{U1}, \dots, p_{UL})$ appear to be about the same across $\ell$.  This accurately reflects the data generating process, since $p_{M\ell}$ and $p_{U\ell}$ are fixed across $\ell$. 
+
+Across parameter combinations, however, the shape of the posterior densities and trace plots for $p_{M\ell}$ and $p_{U\ell}$ do change.  For example, in Figure \ref{mmLarge}, the posterior density for $p_{M\ell}$ is approximately Uniform(0,1), while $p_{U\ell}$ is approximately normally distributed with mean 0.22.  Yet when $L=2$ and $L=3$, I find the same patterns in the posteriors, but with $M$ and $U$ flipped.
+
+% figures for nM = 10, dim(Gamma) = 200 pM =0.5, L = 5
+% mm 
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=0.9\textwidth]{../Figures/mm/nM10/allParam_nM10_L5.png}
+\vspace{-40pt}
+\caption{Histogram of 100,000 draws (burn-in = 5,000) from mixture model for all parameters with true parameter values $(L, n_1, n_2, p_M, p_{M\ell}, p_{U\ell}) = (5, 20, 20, 0.5, 0.9, 0.2)$ and independent, flat priors}
+\label{mmLarge}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=\textwidth]{../Figures/mm/nM10/allParam_nM10_L3.png}
+\vspace{-40pt}
+\caption{Histogram of 100,000 draws (burn-in = 5,000) from mixture model for all parameters with true parameter values $(L, n_1, n_2, p_M, p_{M\ell}, p_{U\ell}) = (3, 20, 20, 0.5, 0.9, 0.2)$ and independent, flat priors}
+\label{mmFlips}
+\end{center}
+\end{figure}
+
+This is desirable, given that these values are the same for all $\ell$.  However, identifiability seems to be a real issue in the model, arising from the fact that there are several distinct representations which are observationally equivalent.  
+
+An issue specific to mixture model is the label degeneracy -- the ``M" mixture may actually be the ``U" mixture and vice versa. 
+
+%% calculate the implied weights for all points in the mixture model 
+
+Depending on the parameter configuration, the variables flip.  This is the classic mixture model identification problem.  
+
+\subsubsection{Mixture Model} To evaluate convergence for the mixture models, I look at the trace plots of $\params$.  Next steps might include writing a function that calculates the effective sample size, such as the one in the \texttt{coda} package in \texttt{R}, or evaluates the convergence criteria outlined in % GELMAN RUBIN Inference from iterative simulation using multiple sequences; GELMAN BROOKS General methods for monitoring convergence of iterative simulations
+
+For $L<2$ trace plots for 
+
+Mixture model labeling is very much an issue! 
+
+\subsubsection{Beta Record Linkage}
+
+
+\subsection{How correct?}
+
+Comments - Mixture Model
+
+\begin{enumerate} 
+% nM = 2 --> increasing L does not help at least for (p_M, pML, pUL)
+\item ($n_M=2$ case, mixture model):  For $L = 2$, $p_M \to 1$ and $p_{M\ell}$ look approximately normal (but low probability), $p_{U\ell}$ is uniform.  For $L>2, \ p_M \to 0 $, $p_{U\ell}$ are approx normal and low, $p_{M\ell}$ like uniform.  This holds for all $L$.  Adding more comparison info doesn't help because not enough matches.  Seems to mix well.
+\item ($n_M=2$ case, bpm): $L=4$ case: llh bell shaped -- maybe getting stuck? Unclear. need to look at $Z's$.  $p_M$ is flat, $p_M{\ell}$ look like chi sq., pUL look like normal. %check descriptive statistics median and mode, include dnesity 
+\item in the $n_M=2$
+\end{enumerate}
+BPM:
+Patterns in $(p_M, p_{M\ell}, p_{U\ell})$ are persistent across all parameter combinations in bipartite matchings. 
+
+
+
+%bpm
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=0.9\textwidth]{../Figures/bpm/nM10/allParam_nM10_L5.png}
+\caption{Histogram of 100,000 draws (burn-in = 5,000) from Beta Record Linkage model for all parameters and likelihood of $Z$ with true parameter values $(L, n_1, n_2, p_M, p_{M\ell}, p_{U\ell}) = (5, 20, 20, 0.5, 0.9, 0.2)$ and independent, flat priors}
+\label{bpmLarge}
+\end{center}
+\end{figure}
+
+
+
+
+\section{Discussion}
+\subsection{How to improve the results by making more prior restrictions}
 
 It is expected that the probability of agreeing on an individual field of comparison is higher for matches than for nonmatches:
 $$Pr\left(\gamma_{ij}^{\ell} = 1 |\ (i,j)\in M\right) \geq Pr\left(\gamma_{ij}^{\ell} = 1 |\ (i,j) \in U\right) $$ 
 \subsection{Results} Some plots will go here. 
 
-\subsection{Disadvantages/Discussion}
+
 
 This method does not perform well, even when I impose strong priors and set initial parameter values equal to the truth.   First, the posterior for $p_M$ is heavily skewed toward 1 when I sample $I$ using the formula in Step 1.  This corresponds with high posterior probabilities of $I(a,b)$, which may imply large false positive matching rates if threshold is set too low. 
 
@@ -451,20 +542,6 @@ A matched pair $(i,j)$ is selected at random from the set of matched records acc
 Following the advice of (Gelman ref), all probabilities for the algorithm above are computed first in logs and later exponentiated to calculate the jump probability to avoid numerical overflow or underflow. 
 
 Unless otherwise noted, simulations were conducted on Adroit computing, with this machine.  
-
-\newpage
-\begin{figure}[h!]
-   \centering
-   \includegraphics[width=\textwidth]{../Figures/allParam_nM10_L4.png} % requires the graphicx package
-   \caption{Posterior density for $p_M, p_{M\ell}, p_{U\ell}$, with $L=4, n_1=n_2 = 10, p_M = 0.5$}
-   \label{fig:example}
-\end{figure}
-\begin{figure}[h!]
-   \centering
-   \includegraphics[width=\textwidth]{../Figures/traceML_nM10_L4.png} % requires the graphicx package
-   \caption{Trace plot for $p_{M\ell}, \ \ell=1,\dots,4, n_1=n_2 = 10, p_M = 0.5$}
-   \label{fig:example}
-\end{figure}
 
 
 \end{document}  
