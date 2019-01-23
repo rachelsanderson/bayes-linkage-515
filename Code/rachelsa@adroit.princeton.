@@ -440,6 +440,11 @@ if __name__ == "__main__":
         params = json.load(f)
 
     Gamma = pd.read_csv(sys.argv[2])
+
+    gamma = Gamma['gamma'].apply(lambda x: x.replace(" ",","))
+    gamma = gamma.apply(lambda x: eval(x))
+    gamma = gamma.tolist()
+    Gamma['gamma'] = gamma
     # read in params
     L= params['L']
     init = params['init']

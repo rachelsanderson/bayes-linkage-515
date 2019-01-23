@@ -132,6 +132,6 @@ if __name__ == '__main__':
     trace, i = gibbs(gamma, niters, init, hypers)
     end = time.time()
 
-    trace.to_csv(outputDir + 'trace_' + ext + '.csv', mode = 'w')
+    trace.to_csv(outputDir + 'sg_trace_' + ext + '.csv', mode = 'w')
     print('Time to perform ' + str(niters) + ' for ' + str(len(gamma)) + ' pairs, L = '\
         + str(L) + ' is ' + str(round(end-start,3)) + ' seconds')

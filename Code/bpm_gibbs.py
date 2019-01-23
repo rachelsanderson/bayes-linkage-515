@@ -394,7 +394,6 @@ def gibbs(Gamma, iters, init, hypers, Z_init, n1, n2):
 
         # 2. Draw pML | Z, pUL | Z
         gamma = Gamma['gamma']
-        print(Gamma['gamma'])
         pML = sample_pML(state, hypers['aML'], hypers['bML'])
         pUL = sample_pUL(state, hypers['aUL'], hypers['bUL'])
 
@@ -441,6 +440,11 @@ if __name__ == "__main__":
         params = json.load(f)
 
     Gamma = pd.read_csv(sys.argv[2])
+
+    gamma = Gamma['gamma'].apply(lambda x: x.replace(" ",","))
+    gamma = gamma.apply(lambda x: eval(x))
+    gamma = gamma.tolist()
+    Gamma['gamma'] = gamma
     # read in params
     L= params['L']
     init = params['init']
