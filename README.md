@@ -1,5 +1,19 @@
 # Bayesian Record Linkage
 
+Code for implementing the analysis performed in "Bayesian Record Linkage" by Rachel Anderson (2019).
+
+## Python scripts
+
+* *json_writer.py* - Takes as input parameters length of comparison vector (*L*), size of files (*n1,n2*), and initial parameters for Gibbs sampler.  Outputs JSON file "param_" + *ext* and saves in Input folder
+
+* *gen_data.py* - Takes as inputs "true" (*pM, pML, pUL*) and generates a DataFrame with record pair identifiers *i,j*, true match status, and comparison vector *gamma*.    
+
+* *simple_gibbs.py* - Performs Gibbs sampling according to mixture model of record linkage.  Outputs frequency of matches as a text file and a .csv file of parameter values for (*pM, pML, pUL*).
+
+* *bpm_gibbs.py* - Performs Gibbs sampling according to the bipartite matching model in Sadinle (2017) using the steps outlined in Larsen (2005).  Outputs .csv files for *Z_trace* and *trace* which contain draws for the matching labeling *Z* and (*pM,pML,pUL*).
+
+
+## SLURM
 
 ## How to run this code
 
