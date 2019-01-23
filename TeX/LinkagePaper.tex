@@ -7,7 +7,7 @@
 \usepackage{amssymb}
 \usepackage{epstopdf}
 \usepackage{natbib}
-\usepackage[nomarkers,nolists,figuresonly]{endfloat}
+%\usepackage[nomarkers,nolists,figuresonly]{endfloat}
 \usepackage{booktabs}
 
 \DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
@@ -16,6 +16,7 @@
 \newcommand\gamij{\mathbf{\gamma_{ij}}}
 \def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
 \newcommand\params{(p_M, p_{M\ell}, p_{U\ell})}
+\newcommand\longparam{(L,n_1,n_2, p_M,p_{M\ell},p_{U\ell})}
 
 \title{Bayesian Record Linkage}
 \author{Rachel Anderson}
@@ -258,18 +259,35 @@ For the results presented here, I test $p_{M\ell} = 0.9$ and $p_{U\ell}=0.2$ for
 
 I use a flat prior for all parameters ($\alpha_M=\beta_M=\alpha_{M\ell}=\beta_{M\ell}=\alpha_{U\ell}=\beta_{U\ell}=1$).  However, these are also flexible.  %TO DO (jupyter notebook?)  Some small scale simulations showed that my results were extremely sensitive/not sensitive to piror. 
 
+% Note on computation here? 
 
 \section{Results}
 
-For each dataset, I perform Gibbs sampling according to the Mixture Modeling and Beta Record linkage approaches.  Here is what I find
-
-I use burn-in = 2000 but the results are generally robust to larger burn-in.
+For each dataset, I perform Gibbs sampling according to the Mixture Modeling and Beta Record linkage approaches.  Unless otherwise specified I use a burn-in of 5,000. Here is what I find, 
 
 \subsection{Mixture Model} 
 
-For each parameter combination tested, the posterior densities and trace plots for $(p_{M1}, \dots, p_{ML})$ and $(p_{U1}, \dots, p_{UL})$ appear to be about the same across $\ell$.  This accurately reflects the data generating process, since $p_{M\ell}$ and $p_{U\ell}$ are fixed across $\ell$. 
+\subsubsection{Convergence} To evaluate convergence for the mixture models, I look at the trace plots of $\params$.  A common pattern across all chains is that $p_M$ converges to values near 0 or 1 within a few initial draws, and then stays close to that value for all remaining draws.  Additionally, one of $p_{M\ell}$ or $p_{\ell}$ oscillates between 0 and 1 for all draws, while the other oscillates between 0.15 and 0.35.  A--n example of this is Figure \ref{mmConverge}. 
+  
+Aside from the strange pattern of $p_M$, my posterior density estimates are robust to different burn-in amounts, which suggests that all parameters are either stuck or, in some sense, converged.  It may be possible to rewrite the sampler to avoid this issue,  however there are deeper issues about the model such that it did not merit the effort.\footnote{I tried fixing this in earlier versions of the code, by adding 1 to the denominator when sampling from $P(\mathbf{I} | \params)$ if $p_M$ was converging to 1 too quickly.} 
 
-Across parameter combinations, however, the shape of the posterior densities and trace plots for $p_{M\ell}$ and $p_{U\ell}$ do change.  For example, in Figure \ref{mmLarge}, the posterior density for $p_{M\ell}$ is approximately Uniform(0,1), while $p_{U\ell}$ is approximately normally distributed with mean 0.22.  Yet when $L=2$ and $L=3$, I find the same patterns in the posteriors, but with $M$ and $U$ flipped.
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=\textwidth]{../Figures/mm/nM10/allTrace_nM10_L4.png}
+\caption{Trace plots for 100,000 draws of $\params$ with true values of $\longparam = (4,20,20,0.5,0.9,0.2)$ and no burn-in}
+\label{mmConverge}
+\end{center}
+\end{figure}
+
+\subsubsection{Identifiability} For each parameter combination tested, the posterior densities and trace plots for $(p_{M1}, \dots, p_{ML})$ and $(p_{U1}, \dots, p_{UL})$ appear to be about the same across $\ell$.  This accurately reflects the data generating process, since $p_{M\ell}$ and $p_{U\ell}$ are fixed across $\ell$.  Across parameter combinations, however, the posterior densities for $p_{M\ell}$ and $p_{U\ell}$ flip.  For example, in Figure \ref{mmLarge}, the posterior density for $p_{M\ell}$ is approximately Uniform(0,1), while $p_{U\ell}$ is approximately normally distributed with mean 0.22.  Yet for $L=2$ and $L=3$ (and all other parameters unchanged), the roles of $M$ and $U$ flip (Figure \ref{mmFlips})
+
+This example illustrates that identifiability is an issue.  First, there is the issue of label degeneracy, which is the fact that the estimated ``M" mixture may actually be the ``U" mixture if I do not impose additional restrictions.  A deeper issue is that in each of my datasets, there are between 2-10 matched record pairs, out of 100-400 possible links.  
+
+% May be useful to use a logit function? Values are very close to 0.  Estimating small probabilities is hard. 
+
+\subsubsection{Matching and matching weights}
+
+% NEED TO LOOK AT THE IMPLIED WEIGHTS FROM THIS MODEL
 
 % figures for nM = 10, dim(Gamma) = 200 pM =0.5, L = 5
 % mm 
@@ -291,22 +309,10 @@ Across parameter combinations, however, the shape of the posterior densities and
 \end{center}
 \end{figure}
 
-This is desirable, given that these values are the same for all $\ell$.  However, identifiability seems to be a real issue in the model, arising from the fact that there are several distinct representations which are observationally equivalent.  
 
-An issue specific to mixture model is the label degeneracy -- the ``M" mixture may actually be the ``U" mixture and vice versa. 
+\subsection{Beta Record Linkage}
 
-%% calculate the implied weights for all points in the mixture model 
-
-Depending on the parameter configuration, the variables flip.  This is the classic mixture model identification problem.  
-
-\subsubsection{Mixture Model} To evaluate convergence for the mixture models, I look at the trace plots of $\params$.  Next steps might include writing a function that calculates the effective sample size, such as the one in the \texttt{coda} package in \texttt{R}, or evaluates the convergence criteria outlined in % GELMAN RUBIN Inference from iterative simulation using multiple sequences; GELMAN BROOKS General methods for monitoring convergence of iterative simulations
-
-For $L<2$ trace plots for 
-
-Mixture model labeling is very much an issue! 
-
-\subsubsection{Beta Record Linkage}
-
+Next steps might include writing a function that calculates the effective sample size, similar to the one from the \texttt{coda} package in \texttt{R}, or that uses the implements the appropriate convergence criteria from \cite{brooks_gelman_1998} and  \cite{gelman_rubin_1992}.
 
 \subsection{How correct?}
 

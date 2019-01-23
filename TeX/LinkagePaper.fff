@@ -1,5 +1,14 @@
 \begin{figure}[h!]
 \begin{center}
+\includegraphics[width=0.7\textwidth]{../Figures/mm/nM10/traceM_nM10_L4.png}
+\caption{default}
+\label{default}
+\end{center}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}[h!]
+\begin{center}
 \includegraphics[width=0.9\textwidth]{../Figures/mm/nM10/allParam_nM10_L5.png}
 \vspace{-40pt}
 \caption{Histogram of 100,000 draws (burn-in = 5,000) from mixture model for all parameters with true parameter values $(L, n_1, n_2, p_M, p_{M\ell}, p_{U\ell}) = (5, 20, 20, 0.5, 0.9, 0.2)$ and independent, flat priors}

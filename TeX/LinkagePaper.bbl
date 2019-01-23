@@ -1,10 +1,23 @@
 \begin{thebibliography}{}
 
+\bibitem[\protect\citeauthoryear{Brooks and Gelman}{Brooks and
+  Gelman}{1998}]{brooks_gelman_1998}
+Brooks, S.~P. and A.~Gelman (1998).
+\newblock General methods for monitoring convergence of iterative simulations.
+\newblock {\em Journal of Computational and Graphical Statistics\/}~{\em
+  7\/}(4), 434?455.
+
 \bibitem[\protect\citeauthoryear{Fortini, Liseo, Nuccitelli, and Scanu}{Fortini
   et~al.}{2001}]{fortini2001}
 Fortini, M., B.~Liseo, A.~Nuccitelli, and M.~Scanu (2001).
 \newblock On bayesian record linkage.
 \newblock {\em Research in Official Statistics\/}~{\em 4\/}(1), 185--198.
+
+\bibitem[\protect\citeauthoryear{Gelman and Rubin}{Gelman and
+  Rubin}{1992}]{gelman_rubin_1992}
+Gelman, A. and D.~B. Rubin (1992).
+\newblock Inference from iterative simulation using multiple sequences.
+\newblock {\em Statistical Science\/}~{\em 7\/}(4), 457?472.
 
 \bibitem[\protect\citeauthoryear{Herzog, Scheuren, and Winkler}{Herzog
   et~al.}{2007}]{herzog2007}
