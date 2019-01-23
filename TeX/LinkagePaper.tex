@@ -7,10 +7,12 @@
 \usepackage{amssymb}
 \usepackage{epstopdf}
 \usepackage{natbib}
+\usepackage{booktabs}
 
 \DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
 
 \newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
+\newcommand\gamij{\mathbf{\gamma_{ij}}}
 \def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
 
 \title{Bayesian Record Linkage}
@@ -36,65 +38,82 @@ In this paper, I review and implement the Bayesian record linkage procedures fro
 Then, with these posteriors, I perform a basic regression analysis using methods from \cite{lahiri_larsen_2005} and \cite{tancredi_liseo_2015} \cite{tancredi_liseo_2011} about how to propagate uncertainty from the matches into a basic regression analysis.   
 %also tancredi liseo 2015
 
-\section{Probabilistic Record Linkage via Mixture Models}
+I (1) review the two methods
+(2) implement both, and compare results
+(3) write a research plan -- how I will continue the analysis
 
-\subsection{Setup} Consider two datafiles $X_1$ and $X_2$ that record information from two overlapping sets of individuals or entities.  The files originate from two record-generating processes that may induce errors and missing values, so that identifying which individuals are represented in both $X_1$ and $X_2$ is nontrivial.  I assume that individuals appear at most once in each datafile\footnote{If not, one would perform first de-duplication, another topic}, so that the goal of record linkage is to identify which records in files $X_1$ and $X_2$ refer to the same entities.  
+\section{Setup}
+
+% this here 
+There are many ways to approach this (REFERNECES), I use the setup considered in Fellegi and Sunter. 
+% end
+
+Consider two datafiles $X_1$ and $X_2$ that record information from two overlapping sets of individuals or entities.  The files originate from two record-generating processes that may induce errors and missing values, so that identifying which individuals are represented in both $X_1$ and $X_2$ is nontrivial.  I assume that individuals appear at most once in each datafile, so that the goal of record linkage is to identify which records in files $X_1$ and $X_2$ refer to the same entities\footnote{If not, one would perform first de-duplication, another topic}.  
 
 Suppose that files $X_1$ and $X_2$ contain $n_1$ and $n_2$ records, respectively, and without loss of generality that $n_1 \geq n_2$.  Denote also the number of entities represented in both files as $n_{M}$, so that $n_2\geq n_M \geq 0$. 
 
 According to the probabilistic record linkage framework of Fellegi and Sunter (1969), the set of ordered record pairs $X_1 \times X_2$ is the union of two disjoint sets, \textit{matches} $(M)$ and \textit{non-matches} $(U)$:
-\begin{align*} M &= \{(i,j): i\in X_1, j\in X_2, \Delta_{ij}=1\} \\ U &= \{(i,j): i\in X_1, j\in X_2, \Delta_{ij}=0\}\end{align*} 
+\begin{align*} M &= \{(i,j): i\in X_1, j\in X_2, i=j\} \\ U &= \{(i,j): i\in X_1, j\in X_2, i\neq j\}\end{align*} 
 
-A record pair $(i,j) \in X_1\times X_2$ is evaluated according to $L$ different comparison criteria, represented by the comparison vector $\gamma_{ij}= (\gamma_{ij}^1, \dots, \gamma_{ij}^{\ell}, \dots, \gamma_{ij}^L)$.  The comparison criteria may be binary, as in ``$i$ and $j$ have the same birthday", or factor variables that account for partial agreement between strings (see Jaro-Winkler reference here).    % Could add Jaro-Winkler distance note here.  
+A record pair $(i,j) \in X_1\times X_2$ is evaluated according to $L$ different comparison criteria, which arise from comparing various data fields for $i$ and $j$, such as first name, last name, address, or social security number, if $i$ and $j$ represent people.  These comparisons are represented by a \textit{comparison vector}, $$\mathbf{\gamma_{ij}}= (\gamma_{ij}^1, \dots, \gamma_{ij}^{\ell}, \dots, \gamma_{ij}^L)$$  The comparison criteria may be binary, as in ``$i$ and $j$ have the same birthday", or factor variables that account for partial agreement between strings (see \citealp{winkler90}, for details).  The models presented herein use only binary comparison vectors, however they can be extended to allow for partial agreement using the framework from \cite{sadinle_2017}.
 
-The probability of observing a particular configuration of $\gamma_{ij}$ can be modeled as arising from the mixture distribution:
+The probability of observing a particular configuration of $\gamij$ can be modeled as arising from the mixture distribution:
 \begin{equation}
-P(\gamma_{ij}) = P(\gamma_{ij} | M) p_M + P(\gamma_{ij} | U) p_U 
+P(\gamij) = P(\gamij | M) p_M + P(\gamij | U) p_U 
 \label{mm}
 \end{equation}
-where $P(\gamma_{ij} | M)$ and $P(\gamma_{ij} | U)$ are the probabilities of observing the pattern $\gamma_{ij}$ conditional on the record pair $(i,j)$ belonging to $M$ or $U$ , respectively.  The proportions $p_M$ and $p_U = 1-p_M$ are the marginal probabilities of observing a matched or unmatched pair in the population of record pairs. 
+where $P(\gamma_{ij} | M)$ and $P(\gamma_{ij} | U)$ are the probabilities of observing the pattern $\gamma_{ij}$ conditional on the record pair $(i,j)$ belonging to $M$ or $U$, respectively.  The proportions $p_M$ and $p_U = 1-p_M$ are the marginal probabilities of observing a matched or unmatched pair.  
 
-Since membership to $M$ or $U$ is not actually observed, a convenient way of simultaneously estimating $p_M, p_U$ and performing classification is via mixture modeling, with mixture distributions $P(\gamma_{ij} | C)$ for $C\in\{M,U\}$.  
+Applying Bayes' Rule, we obtain the probability of $(i,j) \in M$ conditional on observing $\gamij$:
+\begin{equation} P(M | \gamij) = \frac{p_M P(\gamij | M)}{P(\gamij)} \label{bayes} \end{equation}
+So that if we can estimate the quantities in (\ref{mm}), we can estimate the probability that any two records refer to the same entity.  
 
-\subsection{Conditional independence} If the comparison vector fields $\gamma_{ij}^{\ell}$ are independent across $\ell$ conditional on match status (i.e. if errors in name and address are not correlated conditional on match status %talk about this
-then: 
+%good until here
+Once these probabilities are estimated, it is possible to perform the analysis: weighting match pairs, assigning matches via linear program that forces one-to-one assignment, or whatever else the researcher desires.
+
+This paper focuses on methods for matching that best capture uncertainty about matches.  Future work will focus on how this introduces other biases.
+
+%end 
+
+\section{Simplifying assumptions}
+
+Let $\mathbf{\Gamma} \equiv \{\mathbf{\gamma_{ij}}: \  (i,j) \in X_1\times X_2\}$ denote the set of comparison vectors for all records pairs $(i,j) \in X_1\times X_2$.  
+
+\subsection{Blocking} 
+
+Note that $\mathbf{\Gamma}$ contains potentially $n_1 \times n_2$ elements, so that calculating $\mathbf{\Gamma}$ may be computationally expensive when $X_1$ or $X_2$ is large.  In practice, researchers partition $X_1\times X_2$ into ``blocks", where only records belonging to the same block are attempted to be linked, and records belonging to different blocks are assumed to be nonmatches.  For example, postal codes and household membership are often used to define blocks in census applications, however it is important that the blocking variables are recorded without error \citep{herzog2007}.
+
+% this will need fixing:
+This paper assumes that no blocking is used; or, alternatively, that records are already divided into blocks that can be analyzed independently using the methods outlined below.  
+
+\subsection{Conditional independence} In principle, we can model,
+\begin{align*} \gamij\  |\  M &\sim \text{Dirichlet}(\mathbf{\delta_M})\\
+\gamij\  |\  U &\sim \text{Dirichlet}(\mathbf{\delta_U}) \end{align*}
+However, there are $2^{L}-1$ possible configurations of each $\gamij$, so that $\mathbf{\delta_M}$ and $\mathbf{\delta_U}$ may be very high-dimensional if we want to allow assymetric probabilities to vary across different categories, which makes sense in many applications.  It may be possible to perform factor analysis or something... some have done this
+
+A common assumption in the literature is to define comparison fields $\ell$ so that $\gamma_{ij}^{\ell}$ are independent across $\ell$ conditional on match status (i.e. if errors in name and address are not correlated conditional on match status %talk about this
+This implies:
  \begin{equation} 
  P(\gamma_{ij} | C) = \prod_{\ell=1}^L P(\gamma_{ij}^{\ell} | C)^{\gamma_{ij}^{\ell}}(1-Pr(\gamma_{ij}^{\ell} | C))^{1-\gamma_{ij}^{\ell}} \hspace{20pt} C\in \{M, U\} 
  \label{eq:condInd}
  \end{equation}
- if the $\{\gamma_{ij}^{\ell}\}_{\ell=1}^L$ are binary.  This assumption reduces the number of parameters used to describe each mixture class from $2^L -1$ (as there are $2^L-1$ potential configurations of $\gamma$) to $L$
+Hence the number of parameters used to describe each mixture class is reduced to $L$
  
  % TALK ABOUT WHAT THIS IMPLIES
  
- \subsection{Blocking}  If $n_1\times n_2$ is large, the computations required to construct $\gamma$ and iterate through different configurations of the data are unreasonable.  It is therefore common to use blocking to limit the number of comparisons that are being studied.  
+ \section{Mixture Model Approach to Record Linkage}
+
+ Since membership to $M$ or $U$ is not actually observed, a convenient way of simultaneously estimating $p_M, p_U$ and classifying $(i,j)$ into matches and non-matches is via mixture modeling, with mixture distributions $P(\gamij | M)$ and $P(\gamij | U)$.   %This approach was suggested by Bayesian approaches to record linkage have been suggested by Larsen (1999a, 2002, 2004, 2005), Fortini et al. (2002, 2000), and McGlinchy (2004).
  
- \subsection{Prior information}
- 
- %Bayesian approaches to record linkage have been suggested by Larsen (1999a, 2002, 2004, 2005), Fortini et al. (2002, 2000), and McGlinchy (2004).
- Let $p_{M\ell} = P(\gamma_{ij}^{\ell} | M), \ p_{U\ell} = P(\gamma_{ij}^{\ell} | U)$.  Assuming the conditional independence model (\ref{eq:condInd}) and global parameters that do not vary by block, a convenient prior distribution on the parameters is the product of independent Beta distributions,
+\subsection{Estimation} For convenience, denote $p_{M\ell} = P(\gamma_{ij}^{\ell} | M)$ and $ p_{U\ell} = P(\gamma_{ij}^{\ell} | U)$.  Assuming conditional independence across $\ell$ (and global parameters that do not vary by block, if using blocked records), a convenient prior distribution is the product of independent Beta distributions,
  \begin{gather*}
  p_M \sim \text{Beta}(\alpha_M, \beta_M) \\
  p_{M\ell} \sim \text{Beta}(\alpha_{M\ell}, \beta_{M\ell}), \ \ell = 1,\dots, L \\
-  p_{U\ell} \sim \text{Beta}(\alpha_{U\ell}, \beta_{U\ell}), \ \ell = 1,\dots, L \\
+  p_{U\ell} \sim \text{Beta}(\alpha_{U\ell}, \beta_{U\ell}), \ \ell = 1,\dots, L 
  \end{gather*}
- Larsen (2012) notes that it is also possible to specify a prior distribution over the whole probability vector associated with the set of comparison vectors $\gamma$ as two Dirichlet distributions:
- \begin{gather*}
-  Pr(\gamma | M) \sim \text{Dirichlet}(\delta_M) \\
- Pr(\gamma | U) \sim \text{Dirichlet}(\delta_U)
- \end{gather*}
- I TRY BOTH in this paper?  % IMPLEMENT BOTH and compare?? 
- 
- \subsection{Non-binary comparisons/Levels} Here I note that it is possible to model non-binary variables. (See Sadline), but that is beyond the current state of this project. Otherwise we can represent it in another way as in Sadinle (2017) but it's a pain. (Can include it) %Think about whether to add Sadinle
- 
- \subsection{Gibbs sampler (Larsen, 2012)}
- 
-For $i=1,\dots,n_1 \in X_1$, $j = 1, \dots, n_2 \in X_2$ define
-
-$$I_{ij} = \begin{cases} 1, & \text{if records $i\in X_1$ and $j\in X_2$ refer to the same entity;} \\ 0, & \text{otherwise} \end{cases} $$ 
-
-Note that if we were to consider blocking, $I(\cdot)$ would be defined only for elements $(i_s,j_s)$ belonging to the same block $s$. 
- 
-If the match indicators $I$ were known, the posterior distributions of individual parameters given values of the other parameters would be as follows:
+ For $i=1,\dots,n_1 \in X_1$, $j = 1, \dots, n_2 \in X_2$ define
+$$I_{ij} = \begin{cases} 1, & \text{if records $i\in X_1$ and $j\in X_2$ refer to the same entity;} \\ 0, & \text{otherwise} \end{cases} $$  
+If the match indicators $\mathbf{I}$ were known, the posterior distributions of $\left(p_M, \mathbf{p_{M\ell}, p_{U\ell}}\right)$ would be:
 
 % pM | I
 \begin{equation}
@@ -114,32 +133,25 @@ p_{U\ell} | I \sim \text{Beta}\left(\alpha_{U\ell} + \sum_{(i,j)}(1-I_{ij})\gamm
 \label{eq:pUL}
 \end{equation}
 
-The posterior distribution of parameters can therefore be simulated via the following Gibbs Sampling scheme.
+% \[ P(\mathbf{\Gamma} | \mathbf{I}) &= \prod_{(i,j)} P(\gamij | M)^{I_{ij}} P(\gamij | U)^{1-I_{ij}} \]
 
-\begin{enumerate}
-\item Specify parameters for the prior distributions.  Choose initial values of $\left(p_M^{(0)}, p_{M\ell}^{(0)}, p_{U\ell}^{(0)}\right)$ for $\ell=1,\dots L$.  
+The posterior distribution of parameters can therefore be simulated from alternating conditional distribution draws via the  Gibbs Sampling scheme in \cite{larsen_2005}.  See Appendix \ref{app:simple_gibbs} for details.
 
-\item Repeat the following steps numerous times until the distribution of draws has converged to the posterior distribution of interest:
-\begin{enumerate}
+\subsection{Interpreting the results}  For a candidate pair $(i,j)$, the posterior probability of a match is $P(I_{ij}  = 1 | p_M, p_{M\ell}, p_{U\ell}) = \frac{1}{K}\sum_k I_{ij}^{(k)}$.  Options for designating matches are to (1) designate all candidate pairs exceeding a cutoff as matches, or (2) use a linear program to enforce one-to-one matching. 
 
-\item Using the current values of $\left(p_M^{(k)}, p_{M\ell}^{(k)}, p_{U\ell}^{(k)}\right)$, draw $I_{ij}^{(k+1)}$ for each $(i,j)$ candidate pair as an independent draw from a Bernoulli distribution with parameter
-\begin{equation}
-Pr\left( I_{ij}^{(k+1)}=1 \Big| \gamma_{ij}\right) = Pr\left(M | \gamma_{ij}\right) = \frac{p_M^{(k)}Pr\left(\gamma_{ij} | M, p_{M\ell}^{(k)} \right)}{Pr\left(\gamma_{ij} \Big | p_M^{(k)}, p_{M\ell}^{(k)}, p_{U\ell}^{(k)}\right)}
-\end{equation} where 
-$$ Pr\left(\gamma_{ij} | M, p_{M\ell}^{(k)} \right) = \prod_{\ell=1}^L  \left(p_{M\ell}^{(k)}\right)^{\gamma_{ij}^{\ell}}\left(1-p_{M\ell}^{(k)}\right)^{1-\gamma_{ij}^{\ell}}$$ and the denominator is calculated according to (\ref{mm}) above. 
-\item Draw a value of $p_M^{(k+1)}$ from (\ref{eq:pM}).
-\item Draw values of $\{p_{M\ell}^{(k+1)}\}_{\ell=1}^L$ independently from (\ref{eq:pML}). 
-\item Draw values of $\{p_{U\ell}^{(k+1)}\}_{\ell=1}^L$ independently from (\ref{eq:pUL}). 
-\end{enumerate}
-\item Stop once the algorithm has converged.  Criteria for Convergence ARE X Y Z. %Convergence of the algorithm can be monitored by comparing distributions from multiple independent series as suggested by Gelman and Rubin (1992) and Brooks and Gelman (1998).
-\end{enumerate}
-\subsection{Interpreting the results, one-to-one matching}  For a candidate pair $(i,j)$, the posterior probability of a match is $P(I_{ij}  = 1 | p_M, p_{M\ell}, p_{U\ell}) = \frac{1}{K}\sum_k I_{ij}^{(k)}$.  Options for designating matches are to (1) designate all candidate pairs exceeding a cutoff as matches, or (2) use a linear program to enforce one-to-one matching.   
 
 \subsection{Limitations}
 \begin{enumerate}
 \item There is no guarantee that the clusters will correspond to matches and non-matches.  This is a more general criticism about using mixture models, which suffer from this identification problem.  In practice, 3-component mixtures tend to work better, even though theoretically we would like two.  Winkler (2002) mentioned conditions for the mixture model to give good results: the proportion of matches should be greater than 5\%, the classes of matches and non-matches should be well-separated, typographical errors must be relatively low, there must be redundant fields that overcome errors in other fields, among others. 
 \item Many-to-one matches can still happen unless the linear sum assignment is used.  Even if mixture model is fitted with the one-to-one constraint, the FS decision rule alone may lead to many-to-many assignments.  The linkage decision for the pair $(i,j)$ not only depends on $\gamma_{ij}$ but on the other pairs. 
 \end{enumerate}
+
+
+ Larsen (2012) notes that it is also possible to specify a prior distribution over the whole probability vector associated with the set of comparison vectors $\gamma$ as two Dirichlet distributions:
+ \begin{gather*}
+  Pr(\gamma | M) \sim \text{Dirichlet}(\delta_M) \\
+ Pr(\gamma | U) \sim \text{Dirichlet}(\delta_U)
+ \end{gather*}
 
 \subsection{Enforcing one-to-one assignment}
 
@@ -152,38 +164,7 @@ The FS decision rule does not enforce the maximum one-to-one assignment that is 
 
 where the constraints ensure that $\Delta$ represents a bipartite matching.  The output of this step is a bipartite matching that maximizes the sum of the weights $w_{ij}$ among matched pairs, and the pairs that are not matched.  Sadinle (2017) shows that this can be thought of as the MLE under the assumption that the comparison vectors are conditionally independent given the bipartite matching. %try to understand this  
 
-
-\section{Testing the methods and results}
-
-I wrote a simple Python script that incoporates this naive Gibbs.  
-
-Things to do: Dirichlet, Betas, truncating the betas. 
-
-\subsection{Data} Description of DGP and simulations. 
-
-\subsection{More prior restrictions}
-
-It is expected that the probability of agreeing on an individual field of comparison is higher for matches than for nonmatches:
-$$Pr\left(\gamma_{ij}^{\ell} = 1 |\ (i,j)\in M\right) \geq Pr\left(\gamma_{ij}^{\ell} = 1 |\ (i,j) \in U\right) $$ 
-\subsection{Results} Some plots will go here. 
-
-\subsection{Disadvantages/Discussion}
-
-This method does not perform well, even when I impose strong priors and set initial parameter values equal to the truth.   First, the posterior for $p_M$ is heavily skewed toward 1 when I sample $I$ using the formula in Step 1.  This corresponds with high posterior probabilities of $I(a,b)$, which may imply large false positive matching rates if threshold is set too low. 
-
-This issue reflects the fact that updates to $(p_M, p_{M\ell}, p_{U\ell})$ depend on assignments of $I(a,b)$. The $sample_I$ function is too quick to assign matches.  This may result from the fact that I use two clusters, and that once $p_{U\ell}$ probabilities get set low, the chain cannot recover.  I test this issue by adding 1 to the denominator of the Bernoulli parameter in Step 1:
-
-$$p \equiv Pr(\ I(a,b)^{(k+1)}=1\ |\ \gamma(a,b)) = Pr(\ M\  |\  \gamma(a,b)) = \frac{p_M^{(k)}Pr(\ \gamma(a,b)\ |\ M)}{Pr(\gamma(a,b)) + 1} $$ 
-
-This change prevents $p_M$ from converging to 1 <span style="color:blue">(but I need to write more tests) </span>
-
-My results are extremely sensitive to a choice of prior! Choosing the prior will be important to explore. 
-
-Could I sample from the joint distribution of $(p_M, p_{M\ell}, p_{U\ell})\ | I$?  Could I model as Dirichlet?
-
-Ultimately it is not worth the time and energy trying to fix this broken method so now I focus on the bipartite matching, which will fix many of these issues.
-
-\section{Bipartite Matchings}
+\section{Beta Record Linkage \citep{sadinle_2017}}
 
 The main disadvantage of the mixture model approach is that it does not enforce one-to-one matching.  Intuitively, if a one-to-one matching is desired, then the matching status of $(i,j)$ should affect the matching status of $(i,j')$.  Yet the mixture model approach does not allow for this.  
 
@@ -232,6 +213,60 @@ $$Pr(Z\ |\ \alpha_M, \beta_M) = \frac{(n_1-n_{12}(Z))!}{n_1!}\frac{\text{Beta}(n
 \item Stop when converged. 
 \end{enumerate}
 The only difference is step 3.  We no longer draw matches according to $n_1\times n_2$ independent Bernoulli random variables.  The procedure used in this paper is exactly that from the appendix of Larsen (2005).  It is quite long, so see Appendix for details. 
+
+
+\section{Testing the methods and results}
+
+I wrote Python scripts that implement Gibbs sampling for the mixture model- and bipartite matching-based approaches to record linkage.  I test them on fake data with different parameters and compare the results.
+\begin{table}[h!]
+\caption{Parameter combinations and time to perform 100,000 iterations (in seconds)}
+\begin{center}
+\begin{tabular}{cccccc|cc}
+\toprule
+ $L$ &  $n_1$ &  $n_2$ &  $p_M$ &  $p_{ML}$ &  $p_{UL}$ & MM & BPM \\
+\midrule
+ 2 &  10 &  10 &  0.2 &  0.9 &  0.2 & 237 & 4174 \\
+ 3 &  10 &  10 &  0.2 &  0.9 &  0.2 & 292 & 4315 \\
+ 4 &  10 &  10 &  0.2 &  0.9 &  0.2 & 329 & 4361 \\ 
+ 5 &  10 &  10 &  0.2 &  0.9 &  0.2 & 379 & 4417 \\ 
+ 2 &  20 &  20 &  0.5 &  0.9 &  0.2 &  900 & 14967 \\ 
+ 3 &  20 &  20 &  0.5 &  0.9 &  0.2 & 1274 & 18643 \\ 
+ 4 &  20 &  20 &  0.5 &  0.9 &  0.2 & 1490 & 18618\\
+ 5 &  20 &  20 &  0.5 &  0.9 &  0.2 & 1469 & 15470 \\
+ 2 &  10 &  10 &  0.9 &  0.9 &  0.2 &  242 & 4246 \\
+ 3 &  10 &  10 &  0.9 &  0.9 &  0.2 & 289 & 4255 \\
+ 4 &  10 &  10 &  0.9 &  0.9 &  0.2 & 334 & 4327 \\
+ 5 &  10 &  10 &  0.9 &  0.9 &  0.2 & 382 & 4249 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\label{default}
+\end{table}%
+
+\subsection{Data}
+
+\subsection{More prior restrictions}
+
+It is expected that the probability of agreeing on an individual field of comparison is higher for matches than for nonmatches:
+$$Pr\left(\gamma_{ij}^{\ell} = 1 |\ (i,j)\in M\right) \geq Pr\left(\gamma_{ij}^{\ell} = 1 |\ (i,j) \in U\right) $$ 
+\subsection{Results} Some plots will go here. 
+
+\subsection{Disadvantages/Discussion}
+
+This method does not perform well, even when I impose strong priors and set initial parameter values equal to the truth.   First, the posterior for $p_M$ is heavily skewed toward 1 when I sample $I$ using the formula in Step 1.  This corresponds with high posterior probabilities of $I(a,b)$, which may imply large false positive matching rates if threshold is set too low. 
+
+This issue reflects the fact that updates to $(p_M, p_{M\ell}, p_{U\ell})$ depend on assignments of $I(a,b)$. The $sample_I$ function is too quick to assign matches.  This may result from the fact that I use two clusters, and that once $p_{U\ell}$ probabilities get set low, the chain cannot recover.  I test this issue by adding 1 to the denominator of the Bernoulli parameter in Step 1:
+
+$$p \equiv Pr(\ I(a,b)^{(k+1)}=1\ |\ \gamma(a,b)) = Pr(\ M\  |\  \gamma(a,b)) = \frac{p_M^{(k)}Pr(\ \gamma(a,b)\ |\ M)}{Pr(\gamma(a,b)) + 1} $$ 
+
+This change prevents $p_M$ from converging to 1 <span style="color:blue">(but I need to write more tests) </span>
+
+My results are extremely sensitive to a choice of prior! Choosing the prior will be important to explore. 
+
+Could I sample from the joint distribution of $(p_M, p_{M\ell}, p_{U\ell})\ | I$?  Could I model as Dirichlet?
+
+Ultimately it is not worth the time and energy trying to fix this broken method so now I focus on the bipartite matching, which will fix many of these issues.
+
 
 % Some literature
 \section{Dicussion/Literature}
@@ -340,6 +375,26 @@ Files will look like
 \newpage
 \appendix
 \section{Appendix}
+
+\subsection{Gibbs Sampler \citep{larsen_2005}}
+\label{app:simple_gibbs}
+\begin{enumerate}
+\item Specify parameters for the prior distributions.  Choose initial values of $\left(p_M^{(0)}, p_{M\ell}^{(0)}, p_{U\ell}^{(0)}\right)$ for $\ell=1,\dots L$.  
+
+\item Repeat the following steps numerous times until the distribution of draws has converged to the posterior distribution of interest:
+\begin{enumerate}
+
+\item Using the current values of $\left(p_M^{(k)}, p_{M\ell}^{(k)}, p_{U\ell}^{(k)}\right)$, draw $I_{ij}^{(k+1)}$ for each $(i,j)$ candidate pair as an independent draw from a Bernoulli distribution with parameter
+\begin{equation}
+Pr\left( I_{ij}^{(k+1)}=1 \Big| \gamma_{ij}\right) = Pr\left(M | \gamma_{ij}\right) = \frac{p_M^{(k)}Pr\left(\gamma_{ij} | M, p_{M\ell}^{(k)} \right)}{Pr\left(\gamma_{ij} \Big | p_M^{(k)}, p_{M\ell}^{(k)}, p_{U\ell}^{(k)}\right)}
+\end{equation} where 
+$$ Pr\left(\gamma_{ij} | M, p_{M\ell}^{(k)} \right) = \prod_{\ell=1}^L  \left(p_{M\ell}^{(k)}\right)^{\gamma_{ij}^{\ell}}\left(1-p_{M\ell}^{(k)}\right)^{1-\gamma_{ij}^{\ell}}$$ and the denominator is calculated according to (\ref{mm}) above. 
+\item Draw a value of $p_M^{(k+1)}$ from (\ref{eq:pM}).
+\item Draw values of $\{p_{M\ell}^{(k+1)}\}_{\ell=1}^L$ independently from (\ref{eq:pML}). 
+\item Draw values of $\{p_{U\ell}^{(k+1)}\}_{\ell=1}^L$ independently from (\ref{eq:pUL}). 
+\end{enumerate}
+\item Stop once the algorithm has converged.  Criteria for Convergence ARE X Y Z. %Convergence of the algorithm can be monitored by comparing distributions from multiple independent series as suggested by Gelman and Rubin (1992) and Brooks and Gelman (1998).
+\end{enumerate}
 
 \subsection{Gibbs sampler for bipartite matching}
 I implement the incremental method for modifying $n_M$ and $Z$ via the Metropolis-Hastings steps outlined in the appendix of Larsen (2005).  As Larsen notes, there are various Gibbs and Metropolis-Hastings sampling procedures that could generate draws from the target distribution, however most are computationally infeasible.  The following procedure is designed to cover the space of possible configurations and to produce higher probabilities of change across iterations.  
