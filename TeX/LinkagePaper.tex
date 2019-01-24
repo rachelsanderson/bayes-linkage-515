@@ -32,16 +32,11 @@
 
 Ask any economist who works with survey or administrative data how they handle imperfect matches when performing a one-to-one merge, and you will get a different answer.  Some pick the matches that they believe are most likely to be correct.  Some estimate the same model using multiple configurations of matched data.  Others avoid the issue entirely, by dropping all matches that are flagged during the automated merge processes in R or Stata.  There is no one-size-fits-all solution for data merging, nor a formal theory about how subjective decisions in the merging process may introduce bias or uncertainty into estimation and inference in economic models. 
 
-This ```merging" problem of joining records from multiple data sources that describe the same entity appears in many fields, such as statistics, computer science, operations research, and epidemiology, under many names, such as record linkage, data linkage, entity resolution, instance identification, de-duplication, merge/purge processing, and entity reconciliation.    In econometrics, these topics fall under the umbrella of ``data combination", and its importance is growing with the increasing availability of large administrative datasets \citep{ridder_moffitt_2007}.  While there are many record linkage techniques, there is little understanding of how these techniques may bias inference, or how researchers should handle these issues in practice.  Examining Bayesian record linkage tools is a promising place to start, as they provide a coherent framework for incorporating uncertainty at every point of the analysis.  
+The ```merging" problem appears in many fields -- statistics, computer science, operations research, and epidemiology -- and under many names -- record linkage, data linkage, entity resolution, instance identification, de-duplication, merge/purge processing, and entity reconciliation.  In econometrics, research on merging belongs to the field of ``data combination," which is becoming increasingly important as the availability and use of large administrative datasets rises across the profession \citep{ridder_moffitt_2007}.  
 
-In this paper, I review and implement two Bayesian record linkage procedures from \cite{larsen_rubin_2001} and \cite{sadinle_2017} to obtain a posterior distribution over the bipartite matching/sets of matches vs. non-matches. I use simulated data (and maybe a real data set if I have time).  I analyze adjustments for what makes a better match and compare them to traditional techniques.
+While there are many record linkage techniques, there is little understanding of how merging decisions bias inferences, nor advice to economists on how they should handle data combination issues in practice.  In this paper I study hierarchical Bayesian record linkage models to learn how to incorporate multiple sources of uncertainty that may arise at different stages of an econometric analysis.  
 
-Then, with these posteriors, I perform a basic regression analysis using methods from \cite{lahiri_larsen_2005} and \cite{tancredi_liseo_2015} \cite{tancredi_liseo_2011} about how to propagate uncertainty from the matches into a basic regression analysis.   
-%also tancredi liseo 2015
-
-I (1) review the two methods
-(2) implement both, and compare results
-(3) write a research plan -- how I will continue the analysis
+In the following sections, I introduce two models based on \cite{larsen_rubin_2001} and \cite{sadinle_2017} -- the Mixture Model (MM) and Beta Record Linkage (BRL) approaches.  I then compare the performance of the two methods using a variety of simulated datasets.  My preliminary results suggest that although mixture models are faster to converge, beta record linkage is superior if a one-to-one matching is desired.  Extensions to this project will aim to apply these techniques to real data, and explore how to incorporate the posterior estimates of uncertainty about matches into subsequent analyses. 
 
 \section{Setup}
 
@@ -162,16 +157,6 @@ To compare the performance of the mixture model approach with the beta record li
 
 \subsection{Data}
 
-For each combination of parameters in Table \ref{params}, I generated a dataset by randomly selecting $n_M = p_M^* n_2$ records from $X_2$ and $n_M$ records from $X_1$ and assigning them as matches.  
-
-I must emphasize that this means $p_M^*$ controls the amount of overlap between the two files.  When $p_M^* = 0.9$ and $n_1=n_2 = 10$, this means all but one record in $X_2$ has a match in $X_1$.  In the mixture model, these same parameter values would imply $p_M = 0.09$ according to (\ref{mm}), since there are only 9 record pairs referring to matches out of 100 possible candidate pairs.  In the beta record linkage model, however, $p_M^*$ refers to the proportion of records in $X_2$ that have a match.  Unfortunately, it is not clear that I can compare the posteriors of $p_M$ across the two types of models for these reasons.\footnote{Admittedly, this is a significant mistake on my part that I realized only after analyzing the results.}
-
-For these record pairs, I generated $\gamij$ according to
- $$\gamma_{ij}^{\ell} \ | \ M \overset{i.i.d.}{\sim}\text{Bernoulli}(p_{M\ell}), \hspace{10pt}\ell = 1,\dots L$$ 
-For the remaining $(n_1n_2 - n_M)$ record pairs, I generated $\gamij$ from
-  $$\gamma_{ij}^{\ell} \ | \ U \overset{i.i.d.}{\sim}\text{Bernoulli}(p_{U\ell}), \hspace{10pt}\ell = 1,\dots L$$ 
-For this paper, I tested $p_{M\ell} = 0.9$ and $p_{U\ell}=0.2$ for all $\ell$ and all datasets, however my Python programs allow for more flexible choices.  
-
 \begin{table}[h!]
 \caption{Parameter combinations and time to perform 100,000 iterations (in seconds)}
 \begin{center}
@@ -195,7 +180,17 @@ For this paper, I tested $p_{M\ell} = 0.9$ and $p_{U\ell}=0.2$ for all $\ell$ an
 \end{tabular}
 \end{center}
 \label{params}
-\end{table}%
+\end{table}
+For each combination of parameters in Table \ref{params}, I generated a dataset by randomly selecting $n_M = p_M^* n_2$ records from $X_2$ and $n_M$ records from $X_1$ and assigning them as matches.  For the $n_M$ matching record pairs, I generated $\gamij$ according to
+ $$\gamma_{ij}^{\ell} \ | \ M \overset{i.i.d.}{\sim}\text{Bernoulli}(p_{M\ell}), \hspace{10pt}\ell = 1,\dots L$$ 
+For the remaining $(n_1n_2 - n_M)$ record pairs, I generated $\gamij$ from
+  $$\gamma_{ij}^{\ell} \ | \ U \overset{i.i.d.}{\sim}\text{Bernoulli}(p_{U\ell}), \hspace{10pt}\ell = 1,\dots L$$ 
+For this paper, I tested $p_{M\ell} = 0.9$ and $p_{U\ell}=0.2$ for all $\ell$ and all datasets, however my Python programs allow for more flexible choices.  
+
+I must emphasize that $p_M^*$ controls the amount of overlap between the two files, $X_1$ and $X_2$, so that $p_M^*$ may be different from $p_M$ defined in  (\ref{mm}).  For example, when $p_M^* = 0.9, n_1=n_2 = 10$, I generated a dataset where 9 out of 10 files in $X_2$ has a match in $X_1$.  In the mixture model framework, these parameter values imply $p_M = 0.09$, since there are 9 record pairs that refer to matches out of 100 possible candidate pairs.  In the beta record linkage model, $p_M^*$ and $p_M$ both refer to the proportion of records in $X_2$ that have a match.  This bad parameterization makes comparison across posterior estimates of $p_M$ between models challenging.\footnote{Admittedly, this is a significant mistake on my part that I realized only after analyzing the results.}
+
+
+
 
 \subsection{Priors} This paper tests only flat priors, $(\alpha_M=\beta_M=\alpha_{M\ell}=\beta_{M\ell}=\alpha_{U\ell}=\beta_{U\ell}=1$), however, my programs allow for any valid combination of hyperparameters.  
 
@@ -207,10 +202,7 @@ In future tests, I would like to try restricting the following restrictions sugg
 
 \subsection{Computation} Due to the long run time required to estimate the beta record linkage model, I performed my posterior simulation using the Adroit cluster hosted by Princeton Research Computing.   Included in my code directory is a Python script \texttt{job\_writer.py} that reads in a CSV file of parameter combinations and outputs a SLURM file that can be submitted to the cluster to run the simulations.  
 
-For each dataset, I perform 100,000 iterations for each the mixture model and beta record linkage Gibbs samplers.  Prior to submitting these jobs to the cluster, I performed the analysis on my local machine and estimated the run time to be approximately linear in $n_1\times n_2 \times L \times $ \# iterations.  This does not seem to be entirely true on the cluster, since $(L=5, n_1 = n_2 = 20)$ completed faster than $(L=3,n_1=n_2=20)$. 
-
-% FIX this
-Finally, I compute all THINGS IN LOGS ** mention from BDA3 HERE
+For each dataset, I perform 100,000 iterations of the mixture model and beta record linkage Gibbs samplers.  Prior to submitting these jobs to the cluster, I estimated the run time to be approximately linear in $n_1\times n_2 \times L \times $ \# iterations.  This does not seem to be entirely true on the cluster, since $(L=5, n_1 = n_2 = 20)$ completed faster than $(L=3,n_1=n_2=20)$. 
 
 \section{Results}
 
@@ -267,9 +259,9 @@ As previously mentioned, the implied parameters for $p_M$ are different for the 
 
 This is likely because $p_M$ is sampled from the posterior according to 
 \begin{equation} p_M\ |\ \mathbf{Z} \sim \text{Beta}(\alpha_M + n_{M}(\mathbf{Z}),\ \beta_M + n_{2} - n_{M}(\mathbf{Z})) \end{equation}
-in the beta record linkage model.  Since $n_M(\textbf{Z})$ is bounded between $[0,20]$ across applications, the parameters of the Beta distribution are bounded between $[1,21]$ given the flat prior.  By comparison, the mixture model samples $p_M$ from \ref{cond1}, where $\sum_{(i,j)}I_{ij} \in [0,400]$ depending on the parameters tested.  As a result, the $p_M$ draws from the mixture model converge to either 0 or 1 extremely fast. 
+in the beta record linkage model.  Since $n_M(\textbf{Z})$ is bounded between $[0,20]$ across applications, the parameters of the Beta distribution are bounded between $[1,21]$ given the flat prior.  By comparison, the mixture model samples $p_M$ from (\ref{cond1}), where $\sum_{(i,j)}I_{ij} \in [0,400]$ depending on the parameters tested.  As a result, the $p_M$ draws from the mixture model converge to either 0 or 1 extremely fast. 
 
-Interestingly, the shapes for $p_M{\ell}$ are different between the two models, even though they are updated in the same way.  The only way that the posterior of $p_M{\ell}$ changes is via the comparison fields $\gamma_{ij}^{\ell}$ of the record pairs currently assigned as a match.  The mixture model almost never assigns matches because $p_M$ is so low, and so the posterior distribution of $p_M{\ell}$ is updated only a very small amount.  Since the posterior distribution of $p_M$ does not collapse to 0 in the beta record linkage model, $p_{M\ell}$ does get updated, but the updates skew the values toward 0 (THINK ABOUT GIBBS SAMPLER AND WHY THIS HAPPENS> Could the algorithm be forcing too many acceptances?)  
+Interestingly, the posterior distributions for $\mathbf{p_{M\ell}}$ are different between models, even though they are updated according to the same conditional distribution.  The only way that the posterior of $p_M{\ell}$ changes is via the comparison fields $\gamma_{ij}^{\ell}$ of the record pairs currently assigned as a match.  Since the mixture model almost never assigns record pairs as matches (because $p_M \approx 0$), the posterior distribution of $p_M{\ell}$ is updated only a very small amount.  The posterior distribution of $p_M$ does not collapse to 0 in the beta record linkage model, and so $p_{M\ell}$ does get updated, however the distribution skewed significantly toward 0.  I think this may be an artifact of my Gibbs sampler, which proposes moves in $\mathbf{Z}$ at random, but future investigation is necessary to be sure. 
 
 % PLOT NUMBER OF MATCHES FOR BPM? 
 \begin{figure}[h!]
@@ -280,11 +272,15 @@ Interestingly, the shapes for $p_M{\ell}$ are different between the two models, 
 \end{center}
 \end{figure}
 
-\subsection{Posterior match probabilities} 
+\subsection{Posterior match probabilities}
 
-The estimated posterior probability of $(i,j) \in M$ is:
+\subsubsection{Mixture Model} For a candidate pair $(i,j)$, the posterior probability of $(i,j)\in M$ is \begin{equation}P(I_{ij}  = 1 | p_M, p_{M\ell}, p_{U\ell}) = \frac{1}{K}\sum_{k=1}^K I_{ij}^{(k)}\end{equation} where $k$ is the iteration number from the Gibbs sampler (post-convergence).  If one-to-one matches are desired, one must either (1) designate all candidate pairs whose posterior match probability exceeds a certain threshold as matches, or (2) use a linear program to enforce one-to-one matching.  
+
+Across all applications, the values of $I_{ij}$ are virtually identical for all record pairs, and so I do not calculate the posterior match probabilities based on mixture models.
+
+\subsubsection{Beta record linkage} The estimated posterior probability of $(i,j) \in M$ according to the beta record linkage model is:
 $$ \frac{\# \text{ iterations that } Z_j = i}{\text{total \# of iterations}} $$
-for all $(i,j)\in X_1\times X_2$.  Figure \ref{Ztrace} shows that even when almost all records have a match $(p_M = 0.9)$, the posterior probability that any record is assigned a match is low.  Conditional on being assigned a match in a draw, however, the posterior seems to slightly favor the correct match (Figure \ref{ZtraceCond}) so that if we used a decision rule to assign matches, some of the matches may be correctly assigned.  Given that the chain has not converged, this seems to be promising, albeit not ideal. 
+for all $(i,j)\in X_1\times X_2$.  Figure \ref{Ztrace} shows that even when almost all records have a match $(p_M = 0.9)$, the posterior probability that any record is assigned a match is low.  Conditional on being assigned a match in a draw, however, the posterior seems to slightly favor the correct match (Figure \ref{ZtraceCond}). Given that the chain has not converged, I am hopeful that with more draws (or a better Gibbs sampler), the chains would converge to the correct values. 
 
 \begin{figure}[h!]
 \begin{center}
@@ -301,26 +297,22 @@ for all $(i,j)\in X_1\times X_2$.  Figure \ref{Ztrace} shows that even when almo
 
 A significant limitation of the mixture model approach is that there is no guarantee that the clusters will correspond to matches and non-matches.  Although this is a criticism about mixture models and clustering techniques in general, this label degeneracy produced confusing results for even the most simple datasets I tested.  
 
-Another disadvantage of the mixture model approach presented here is that $\mathbf{I}$ potentially matches a file $i\in X_1$ with multiple files in $X_2$ and vice versa. Even if the mixture model is fitted with a one-to-one constraint, using the ``optimal" decision rule from \ref{fs1969} may lead to many-to-many assignments.  One-to-one matches must be assigned post-processing using a linear sum assignment program that uses the estimated log-likelihood ratios $w_{ij} = \log \left(\frac{P(\gamij | M)}{P(\gamij | U)}\right)$ as weights.  
+Another disadvantage of the mixture model approach presented here is that $\mathbf{I}$ potentially matches a file $i\in X_1$ with multiple files in $X_2$ and vice versa. Even if the mixture model is fitted with a one-to-one constraint, using the ``optimal" decision rule from \cite{fs1969} may lead to many-to-many assignments \citep{sadinle_2017}.  One-to-one matches must be assigned post-processing using a linear sum assignment program that uses the estimated log-likelihood ratios $w_{ij} = \log \left(\frac{P(\gamij | M)}{P(\gamij | U)}\right)$ as weights, which is challenging when the weights themselves are uncertain.   
 
 These issues aside, results from my paper show that the mixture model chains converged quickly (both in terms of number of iterations and in time spent running the Gibbs sampler), and that the posterior distributions for the identified variables were reasonably accurate.  Given these advantages, the mixture model approach may serve as an easy-to-implement counterpart to deterministic record linkage methods.
 
 \subsection{Beta Record Linkage}
- \cite{sadinle_2017} uses beta record linkage to match files with sizes $n_1 = 4,430, n_2 = 1,324$ which gives a total $5,852,080$ record pairs.  He claims that his chains converged after just 2,000 iterations of the Gibbs Sampler based on Geweke's convergence diagnostic as implemented in \texttt{R} package \texttt{coda}.  Based on my own preliminary results, I am slightly skeptical of this claims, however I look forward to comparing his Gibbs sampler code with my own. 
-
-Despite the fact that my MCMC chains had not yet converged after 100,000 draws, I am optimistic about the beta record linkage model.  I think that the issues result form the version of the Gibbs sampler that I wrote.  For computational simplicity, I implemented a Gibbs sampler which chooses at random whether to add, drop, or switch a matching record pair in $\mathbf{Z}$.   I think that implementing some of the ``smarter" steps recommended in \cite{larsen_2005}, even if they are more computationally intensive, will help the chains converge faster.
+ \cite{sadinle_2017} uses beta record linkage to match files with sizes $n_1 = 4,430, n_2 = 1,324$ which gives a total $5,852,080$ record pairs.  He claims that his chains converged after just 2,000 iterations of the Gibbs Sampler based on Geweke's convergence diagnostic as implemented in \texttt{R} package \texttt{coda}.  Based on my own preliminary results, I am skeptical about this claim, however I am optimistic that if I improve my Gibbs sampler I will achieve better results.  For computational simplicity, I implemented a Gibbs sampler which chooses at random whether to add, drop, or switch a matching record pair in $\mathbf{Z}$ each iteration.   I think that implementing some of the more computationally intensive steps recommended in \cite{larsen_2005} will help the chains converge after fewer iterations.
   
 \section{Conclusion}
 
-My motivation for studying Bayesian record linkage techniques was to learn how Bayesian methods may be used to evaluate how linkage rules may introduce bias in  econometric analyses.  
+My motivation for studying Bayesian record linkage techniques was to learn how to incorporate uncertainty produced by merging files with imperfect identifiers into subsequent econometric analyses.  While I have not yet begun to explore this issue directly, I studied and implemented two Bayesian approaches to record linkage, which sharpened my computational skills and deepened my understanding of MCMC techniques and hierarchical models.  I also gained a greater appreciation for applying economic reasoning to statistical analyses, that was spurred by a quote that came up in my research: 
 
-My next steps will be to (1) apply these techniques to real data, and (2) see how they can be used with Scheuren and Winkler (1993) and Lahiri and Larsen (2005) propose bias-corrected estimators of coefficients in a linear regression model given data from a probabilistically linked file. 
+\begin{quote}
+``Every gain which is achieved by a superior record linkage procedure must be justified by the cost of implementing that procedure."\ \ \ \    -- Anonymous Referee 
+\end{quote}
 
-Another area of interested is how to perform linkage in the presence of missing data.  \ref{sadinle_2017} gives a framework that accounts for missing data, but there is possibly more to do. 
-
-Referee for Belin (93): ``every gain which is achieved by a superior record linkage procedure must be justified by the cost of implementing that procedure". 
-
-
+In other words, economics applies even to econometric modeling -- the marginal benefit should exceed its marginal cost. 
 
 \newpage
 % Appendix -- notes on computation 
@@ -351,7 +343,7 @@ $$ Pr\left(\gamma_{ij} | M, p_{M\ell}^{(k)} \right) = \prod_{\ell=1}^L  \left(p_
 \item Draw values of $\{p_{M\ell}^{(k+1)}\}_{\ell=1}^L$ independently from (\ref{eq:pML}). 
 \item Draw values of $\{p_{U\ell}^{(k+1)}\}_{\ell=1}^L$ independently from (\ref{eq:pUL}). 
 \end{enumerate}
-\item Stop once the algorithm has converged.  Criteria for Convergence ARE X Y Z. %Convergence of the algorithm can be monitored by comparing distributions from multiple independent series as suggested by Gelman and Rubin (1992) and Brooks and Gelman (1998).
+\item Stop once the algorithm has converged.  Convergence of the algorithm can be monitored using the appropriate convergence criteria from \cite{brooks_gelman_1998} and  \cite{gelman_rubin_1992}.
 \end{enumerate}
 
 \subsection{Gibbs sampler for bipartite matching \citep{larsen_2005}}
@@ -377,7 +369,7 @@ I implement the incremental method for modifying $n_M$ and $Z$ via the Metropoli
 The full conditional distribution of $(n_m, Z)$ is:
 \begin{equation} 
 Pr\left(n_m, Z | \gamma, p_{M\ell}, p_{U\ell}, p_M, \alpha, \beta \right) \propto Pr(n_m | p_M) Pr(Z | n_M) Pr\left(\gamma | Z,  \{p_M{\ell}, p_{U\ell}\}_{\ell=1}^L, p_M, \alpha, \beta \right) \label{nmZ} \end{equation}
-This is used to calculate the jump probabilities $P(n_M, Z) $ in the moves below.  For all types of moves, there are more clever ways to select which pairs to add, drop, or switch, however these are computationally expensive.  Future steps may include optimizing these steps, although ACCEPTANCE PROBABILITY IS PRETTY GOOD %look this up
+This is used to calculate the jump probabilities $P(n_M, Z) $ in the moves below.  For all types of moves, there are more clever ways to select which pairs to add, drop, or switch, however these are computationally expensive. 
 
 \textbf{Move 1: $n_M^* = n_M - 1 $ }
 
@@ -421,11 +413,7 @@ A matched pair $(i,j)$ is selected at random from the set of matched records acc
 
 \[ \min \left\{1,  \frac{Pr(\gamma_{kl} | M)Pr(\gamma_{ij} | U) n_M}{Pr(\gamma_{ij} | M) Pr(\gamma_{kl} | U) (n_1 - n_M)(n_2 - n_M)} \right\} \]
 
-\subsection{Notes on computation/implementation}
 
-Following the advice of (Gelman ref), all probabilities for the algorithm above are computed first in logs and later exponentiated to calculate the jump probability to avoid numerical overflow or underflow. 
-
-Unless otherwise noted, simulations were conducted on Adroit computing, with this machine.  
 
 
 \end{document}  

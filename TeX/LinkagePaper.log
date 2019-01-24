@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  24 JAN 2019 00:32
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  24 JAN 2019 02:15
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -249,6 +249,14 @@ Package: booktabs 2016/04/27 v1.618033 publication quality tables
 \@thisrulewidth=\dimen136
 )
 (./LinkagePaper.aux)
+Runaway argument?
+{\contentsline {subsubsection}{\tocsubsubsection {}{6.3.2}{Beta 
+./LinkagePaper.tex:25: File ended while scanning use of \@writefile.
+<inserted text> 
+                \par 
+l.25 \begin{document}
+                     
+? 
 \openout1 = `LinkagePaper.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 25.
@@ -264,7 +272,6 @@ LaTeX Font Info:    ... okay on input line 25.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 25.
 LaTeX Font Info:    ... okay on input line 25.
 LaTeX Font Info:    Try loading font information for U+msa on input line 25.
-
 (/usr/local/texlive/2018/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
@@ -320,86 +327,181 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 \MPnumerator=\count112
 \makeMPintoPDFobject=\count113
 \everyMPtoPDFconversion=\toks28
-) [1{/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-[2] [3] [4]
+)
 
-LaTeX Warning: `!h' float specifier changed to `!ht'.
+Package natbib Warning: Citation `ridder_moffitt_2007' on page 1 undefined on i
+nput line 35.
 
 
-Overfull \hbox (16.06853pt too wide) in paragraph at lines 202--203
-[]\OT1/cmr/m/n/10.95 In fu-ture tests, I would like to try re-strict-ing the fo
-l-low-ing re-stric-tions sug-gested by Larsen (2005): 
+Package natbib Warning: Citation `larsen_rubin_2001' on page 1 undefined on inp
+ut line 39.
+
+
+Package natbib Warning: Citation `sadinle_2017' on page 1 undefined on input li
+ne 39.
+
+
+Package natbib Warning: Citation `fs1969' on page 1 undefined on input line 47.
+
+
+[1{/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+
+Package natbib Warning: Citation `winkler90' on page 2 undefined on input line 
+52.
+
+
+Package natbib Warning: Citation `sadinle_2017' on page 2 undefined on input li
+ne 52.
+
+
+Package natbib Warning: Citation `fs1969' on page 2 undefined on input line 64.
+
+
+
+Package natbib Warning: Citation `bda3' on page 2 undefined on input line 64.
+
+
+Package natbib Warning: Citation `herzog2007' on page 2 undefined on input line
+ 72.
+
+[2]
+
+Package natbib Warning: Citation `larsen_rubin_2001' on page 3 undefined on inp
+ut line 89.
+
+[3]
+
+Package natbib Warning: Citation `larsen_rubin_2001' on page 4 undefined on inp
+ut line 126.
+
+
+LaTeX Warning: Reference `app:simple_gibbs' on page 4 undefined on input line 1
+26.
+
+
+Overfull \hbox (49.54599pt too wide) in paragraph at lines 126--127
+\OT1/cmr/m/n/10.95 proach, that uses a Gibbs Sam-pling scheme[] for sim-u-lat-i
+ng the pos-te-rior dis-tri-bu-tion of $\OML/cmm/m/it/10.95 I; \OT1/cmr/m/n/10.9
+5 (\OML/cmm/m/it/10.95 p[]; p[]; p[]\OT1/cmr/m/n/10.95 )$. 
  []
 
-[5] [6]
-<../Figures/mm/nM10/allTrace_nM10_L4.png, id=36, 794.97pt x 578.16pt>
+
+Package natbib Warning: Citation `larsen_2005' on page 4 undefined on input lin
+e 128.
+
+
+LaTeX Warning: Reference `app:simple_gibbs' on page 4 undefined on input line 1
+28.
+
+
+Package natbib Warning: Citation `sadinle_2017' on page 4 undefined on input li
+ne 130.
+
+
+Package natbib Warning: Citation `sadinle_2017' on page 4 undefined on input li
+ne 150.
+
+
+Package natbib Warning: Citation `larsen_2005' on page 4 undefined on input lin
+e 152.
+
+
+LaTeX Warning: Reference `app:gibbsB' on page 4 undefined on input line 152.
+
+[4]
+
+LaTeX Warning: Reference `app:simple_gibbs' on page 5 undefined on input line 1
+56.
+
+
+LaTeX Warning: Reference `app:gibbsB' on page 5 undefined on input line 156.
+
+[5]
+
+Package natbib Warning: Citation `larsen_2005' on page 6 undefined on input lin
+e 197.
+
+<../Figures/mm/nM10/allTrace_nM10_L4.png, id=34, 794.97pt x 578.16pt>
 File: ../Figures/mm/nM10/allTrace_nM10_L4.png Graphic file (type png)
 <use ../Figures/mm/nM10/allTrace_nM10_L4.png>
 Package pdftex.def Info: ../Figures/mm/nM10/allTrace_nM10_L4.png  used on input
- line 226.
+ line 218.
 (pdftex.def)             Requested size: 469.75502pt x 341.64958pt.
-<../Figures/bpm/nM10/allTrace_nM10_L3.png, id=38, 794.97pt x 578.16pt>
+<../Figures/bpm/nM10/allTrace_nM10_L3.png, id=36, 794.97pt x 578.16pt>
 File: ../Figures/bpm/nM10/allTrace_nM10_L3.png Graphic file (type png)
 <use ../Figures/bpm/nM10/allTrace_nM10_L3.png>
 Package pdftex.def Info: ../Figures/bpm/nM10/allTrace_nM10_L3.png  used on inpu
-t line 235.
+t line 227.
 (pdftex.def)             Requested size: 469.75502pt x 341.64958pt.
 
-Underfull \hbox (badness 2173) in paragraph at lines 236--236
+Underfull \hbox (badness 2173) in paragraph at lines 228--228
 \OT1/cmr/m/sc/10.95 Figure 2.\OT1/cmr/m/n/10.95 Trace plot of draws 85,000-100,
 000 for $(\OML/cmm/m/it/10.95 p[]; p[]; p[]\OT1/cmr/m/n/10.95 )$ and the
  []
 
 
-Underfull \hbox (badness 1629) in paragraph at lines 236--236
+Underfull \hbox (badness 1629) in paragraph at lines 228--228
 \OT1/cmr/m/n/10.95 like-li-hood of $\OML/cmm/m/it/10.95 Z$ \OT1/cmr/m/n/10.95 f
 rom a Beta Record Link-age model with true pa-ram-e-ters
  []
 
-<../Figures/mm/nM10/allParam_nM10_L5.png, id=39, 722.7pt x 1011.78pt>
+<../Figures/mm/nM10/allParam_nM10_L5.png, id=37, 722.7pt x 1011.78pt>
 File: ../Figures/mm/nM10/allParam_nM10_L5.png Graphic file (type png)
 <use ../Figures/mm/nM10/allParam_nM10_L5.png>
 Package pdftex.def Info: ../Figures/mm/nM10/allParam_nM10_L5.png  used on input
- line 244.
+ line 236.
 (pdftex.def)             Requested size: 422.77664pt x 591.8812pt.
 
-Underfull \hbox (badness 3250) in paragraph at lines 246--246
+Underfull \hbox (badness 3250) in paragraph at lines 238--238
 \OT1/cmr/m/sc/10.95 Figure 3.\OT1/cmr/m/n/10.95 Histogram of 100,000 draws (bur
 n-in = 5,000) from mix-ture
  []
 
-<../Figures/bpm/nM10/allParam_nM10_L5.png, id=40, 722.7pt x 1011.78pt>
+<../Figures/bpm/nM10/allParam_nM10_L5.png, id=38, 722.7pt x 1011.78pt>
 File: ../Figures/bpm/nM10/allParam_nM10_L5.png Graphic file (type png)
 <use ../Figures/bpm/nM10/allParam_nM10_L5.png>
 Package pdftex.def Info: ../Figures/bpm/nM10/allParam_nM10_L5.png  used on inpu
-t line 254.
+t line 246.
 (pdftex.def)             Requested size: 422.77664pt x 591.8812pt.
 
-LaTeX Warning: Float too large for page by 13.40117pt on input line 258.
+LaTeX Warning: Float too large for page by 13.40117pt on input line 250.
 
-[7 <../Figures/mm/nM10/allTrace_nM10_L4.png>] [8 <../Figures/bpm/nM10/allTrace_
-nM10_L3.png>] [9 <../Figures/mm/nM10/allParam_nM10_L5.png>] [10 <../Figures/bpm
-/nM10/allParam_nM10_L5.png>]
-<../Figures/bpm/nM9/ZmatchesnM9_L3.png, id=58, 1011.78pt x 578.16pt>
+
+LaTeX Warning: Reference `app:gibbsB' on page 6 undefined on input line 252.
+
+[6] [7 <../Figures/mm/nM10/allTrace_nM10_L4.png>]
+<../Figures/bpm/nM9/ZmatchesnM9_L3.png, id=47, 1011.78pt x 578.16pt>
 File: ../Figures/bpm/nM9/ZmatchesnM9_L3.png Graphic file (type png)
 <use ../Figures/bpm/nM9/ZmatchesnM9_L3.png>
 Package pdftex.def Info: ../Figures/bpm/nM9/ZmatchesnM9_L3.png  used on input l
-ine 277.
+ine 269.
 (pdftex.def)             Requested size: 469.75502pt x 268.4358pt.
-<../Figures/bpm/nM9/ZmatchesnM9_L3_cond.png, id=59, 1011.78pt x 578.16pt>
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+
+Underfull \vbox (badness 1147) has occurred while \output is active []
+
+ [8 <../Figures/bpm/nM10/allTrace_nM10_L3.png>] [9 <../Figures/mm/nM10/allParam
+_nM10_L5.png>] [10 <../Figures/bpm/nM10/allParam_nM10_L5.png>]
+
+LaTeX Warning: Reference `ZtraceCond' on page 11 undefined on input line 283.
+
+<../Figures/bpm/nM9/ZmatchesnM9_L3_cond.png, id=60, 1011.78pt x 578.16pt>
 File: ../Figures/bpm/nM9/ZmatchesnM9_L3_cond.png Graphic file (type png)
 <use ../Figures/bpm/nM9/ZmatchesnM9_L3_cond.png>
 Package pdftex.def Info: ../Figures/bpm/nM9/ZmatchesnM9_L3_cond.png  used on in
-put line 291.
+put line 287.
 (pdftex.def)             Requested size: 469.75502pt x 268.4358pt.
 
-Underfull \hbox (badness 2762) in paragraph at lines 292--292
+Underfull \hbox (badness 2762) in paragraph at lines 288--288
 \OT1/cmr/m/sc/10.95 Figure 6.\OT1/cmr/m/n/10.95 Histogram of $\OML/cmm/m/it/10.
 95 Z$ \OT1/cmr/m/n/10.95 draws for bi-par-tite match-ing (con-di-tional on
  []
 
 
-Underfull \hbox (badness 1735) in paragraph at lines 292--292
+Underfull \hbox (badness 1735) in paragraph at lines 288--288
 \OT1/cmr/m/n/10.95 be-ing matched) from a Beta Record Link-age model with true 
 pa-ram-e-ters
  []
@@ -409,51 +511,89 @@ LaTeX Warning: `!h' float specifier changed to `!ht'.
 
 [11 <../Figures/bpm/nM9/ZmatchesnM9_L3.png>]
 
-LaTeX Warning: Reference `fs1969' on page 12 undefined on input line 304.
-
-[12 <../Figures/bpm/nM9/ZmatchesnM9_L3_cond.png>]
-
-LaTeX Warning: Reference `sadinle_2017' on page 13 undefined on input line 319.
+Package natbib Warning: Citation `fs1969' on page 12 undefined on input line 30
+0.
 
 
-[13] (./LinkagePaper.bbl
-./LinkagePaper.bbl:28: Misplaced alignment tab character &.
-l.28 \newblock CRC Press, Taylor &
+Package natbib Warning: Citation `sadinle_2017' on page 12 undefined on input l
+ine 300.
+
+
+Package natbib Warning: Citation `sadinle_2017' on page 12 undefined on input l
+ine 305.
+
+
+Package natbib Warning: Citation `larsen_2005' on page 12 undefined on input li
+ne 305.
+
+[12 <../Figures/bpm/nM9/ZmatchesnM9_L3_cond.png>] [13] (./LinkagePaper.bbl
+./LinkagePaper.bbl:22: Misplaced alignment tab character &.
+l.22 \newblock CRC Press, Taylor &
                                    Francis Group, an informa business.
 ? 
-) [14] [15] [16] [17] (./LinkagePaper.aux)
+) [14]
+
+Package natbib Warning: Citation `larsen_2005' on page 15 undefined on input li
+ne 330.
+
+
+Package natbib Warning: Citation `brooks_gelman_1998' on page 15 undefined on i
+nput line 346.
+
+
+Package natbib Warning: Citation `gelman_rubin_1992' on page 15 undefined on in
+put line 346.
+
+
+Package natbib Warning: Citation `larsen_2005' on page 15 undefined on input li
+ne 351.
+
+[15] [16]
+
+Package natbib Warning: There were undefined citations.
+
+[17] (./LinkagePaper.aux
+
+Package natbib Warning: Citation(s) may have changed.
+(natbib)                Rerun to get citations correct.
+
+)
 
 LaTeX Warning: There were undefined references.
 
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
  ) 
 Here is how much of TeX's memory you used:
- 3801 strings out of 492649
- 50715 string characters out of 6129622
- 130358 words of memory out of 5000000
- 7456 multiletter control sequences out of 15000+600000
- 12531 words of font info for 48 fonts, out of 8000000 for 9000
+ 3789 strings out of 492649
+ 50415 string characters out of 6129622
+ 127555 words of memory out of 5000000
+ 7443 multiletter control sequences out of 15000+600000
+ 12839 words of font info for 49 fonts, out of 8000000 for 9000
  1302 hyphenation exceptions out of 8191
- 42i,12n,38p,968b,235s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 42i,12n,37p,921b,214s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx6.pfb><
 /usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb></u
-sr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb></u
-sr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></us
-r/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr
-/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/l
-ocal/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/loc
-al/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local
-/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/te
-xlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texli
-ve/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texlive/
-2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2
-018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/201
-8/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2018
-/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on LinkagePaper.pdf (17 pages, 473608 bytes).
+sr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr
+/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb></usr
+/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/
+local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/l
+ocal/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/loc
+al/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local
+/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/t
+exlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texl
+ive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive
+/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texlive/20
+18/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/201
+8/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2018/
+texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2018/t
+exmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
+Output written on LinkagePaper.pdf (17 pages, 478409 bytes).
 PDF statistics:
- 136 PDF objects out of 1000 (max. 8388607)
- 88 compressed objects within 1 object stream
+ 140 PDF objects out of 1000 (max. 8388607)
+ 91 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  31 words of extra memory for PDF output out of 10000 (max. 10000000)
 

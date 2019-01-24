@@ -14,12 +14,6 @@ Fellegi, I.~P. and A.~B. Sunter (1969).
 \newblock {\em Journal of the American Statistical Association\/}~{\em
   64\/}(328), 1183--1210.
 
-\bibitem[\protect\citeauthoryear{Fortini, Liseo, Nuccitelli, and Scanu}{Fortini
-  et~al.}{2001}]{fortini2001}
-Fortini, M., B.~Liseo, A.~Nuccitelli, and M.~Scanu (2001).
-\newblock On bayesian record linkage.
-\newblock {\em Research in Official Statistics\/}~{\em 4\/}(1), 185--198.
-
 \bibitem[\protect\citeauthoryear{Gelman, Carlin, Stern, Dunson, Vehtari, and
   Rubin}{Gelman et~al.}{2014}]{bda3}
 Gelman, A., J.~B. Carlin, H.~S. Stern, D.~B. Dunson, A.~Vehtari, and D.~B.
@@ -38,13 +32,6 @@ Gelman, A. and D.~B. Rubin (1992).
 Herzog, T.~N., F.~J. Scheuren, and W.~E. Winkler (2007).
 \newblock {\em Data Quality and Record Linkage Techniques\/} (1st ed.).
 \newblock Springer Publishing Company, Incorporated.
-
-\bibitem[\protect\citeauthoryear{Lahiri and Larsen}{Lahiri and
-  Larsen}{2005}]{lahiri_larsen_2005}
-Lahiri, P. and M.~D. Larsen (2005).
-\newblock Regression analysis with linked data.
-\newblock {\em Journal of the American Statistical Association\/}~{\em
-  100\/}(469), 222--230.
 
 \bibitem[\protect\citeauthoryear{Larsen}{Larsen}{2005}]{larsen_2005}
 Larsen, M. (2005, 10).
@@ -68,20 +55,6 @@ Sadinle, M. (2017).
 \newblock Bayesian estimation of bipartite matchings for record linkage.
 \newblock {\em Journal of the American Statistical Association\/}~{\em
   112\/}(518), 600?612.
-
-\bibitem[\protect\citeauthoryear{Tancredi and Liseo}{Tancredi and
-  Liseo}{2011}]{tancredi_liseo_2011}
-Tancredi, A. and B.~Liseo (2011).
-\newblock A hierarchical bayesian approach to record linkage and population
-  size problems.
-\newblock {\em The Annals of Applied Statistics\/}~{\em 5\/}(2B), 1553?1585.
-
-\bibitem[\protect\citeauthoryear{Tancredi and Liseo}{Tancredi and
-  Liseo}{2015}]{tancredi_liseo_2015}
-Tancredi, A. and B.~Liseo (2015).
-\newblock Regression analysis with linked data: problems and possible
-  solutions.
-\newblock {\em Statistica\/}~{\em 75\/}(1), 19--35.
 
 \bibitem[\protect\citeauthoryear{Winkler}{Winkler}{1990}]{winkler90}
 Winkler, W. (1990, 01).
