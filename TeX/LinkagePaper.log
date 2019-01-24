@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  23 JAN 2019 23:29
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  24 JAN 2019 00:32
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -384,22 +384,22 @@ nM10_L3.png>] [9 <../Figures/mm/nM10/allParam_nM10_L5.png>] [10 <../Figures/bpm
 File: ../Figures/bpm/nM9/ZmatchesnM9_L3.png Graphic file (type png)
 <use ../Figures/bpm/nM9/ZmatchesnM9_L3.png>
 Package pdftex.def Info: ../Figures/bpm/nM9/ZmatchesnM9_L3.png  used on input l
-ine 280.
+ine 277.
 (pdftex.def)             Requested size: 469.75502pt x 268.4358pt.
 <../Figures/bpm/nM9/ZmatchesnM9_L3_cond.png, id=59, 1011.78pt x 578.16pt>
 File: ../Figures/bpm/nM9/ZmatchesnM9_L3_cond.png Graphic file (type png)
 <use ../Figures/bpm/nM9/ZmatchesnM9_L3_cond.png>
 Package pdftex.def Info: ../Figures/bpm/nM9/ZmatchesnM9_L3_cond.png  used on in
-put line 294.
+put line 291.
 (pdftex.def)             Requested size: 469.75502pt x 268.4358pt.
 
-Underfull \hbox (badness 2762) in paragraph at lines 295--295
+Underfull \hbox (badness 2762) in paragraph at lines 292--292
 \OT1/cmr/m/sc/10.95 Figure 6.\OT1/cmr/m/n/10.95 Histogram of $\OML/cmm/m/it/10.
 95 Z$ \OT1/cmr/m/n/10.95 draws for bi-par-tite match-ing (con-di-tional on
  []
 
 
-Underfull \hbox (badness 1735) in paragraph at lines 295--295
+Underfull \hbox (badness 1735) in paragraph at lines 292--292
 \OT1/cmr/m/n/10.95 be-ing matched) from a Beta Record Link-age model with true 
 pa-ram-e-ters
  []
@@ -407,41 +407,53 @@ pa-ram-e-ters
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[11 <../Figures/bpm/nM9/ZmatchesnM9_L3.png>] [12 <../Figures/bpm/nM9/ZmatchesnM
-9_L3_cond.png>] [13] [14] (./LinkagePaper.bbl
+[11 <../Figures/bpm/nM9/ZmatchesnM9_L3.png>]
+
+LaTeX Warning: Reference `fs1969' on page 12 undefined on input line 304.
+
+[12 <../Figures/bpm/nM9/ZmatchesnM9_L3_cond.png>]
+
+LaTeX Warning: Reference `sadinle_2017' on page 13 undefined on input line 319.
+
+
+[13] (./LinkagePaper.bbl
 ./LinkagePaper.bbl:28: Misplaced alignment tab character &.
 l.28 \newblock CRC Press, Taylor &
                                    Francis Group, an informa business.
 ? 
-) [15] [16] [17] [18] (./LinkagePaper.aux) ) 
+) [14] [15] [16] [17] (./LinkagePaper.aux)
+
+LaTeX Warning: There were undefined references.
+
+ ) 
 Here is how much of TeX's memory you used:
- 3800 strings out of 492649
- 50702 string characters out of 6129622
+ 3801 strings out of 492649
+ 50715 string characters out of 6129622
  130358 words of memory out of 5000000
- 7455 multiletter control sequences out of 15000+600000
+ 7456 multiletter control sequences out of 15000+600000
  12531 words of font info for 48 fonts, out of 8000000 for 9000
  1302 hyphenation exceptions out of 8191
- 42i,12n,38p,968b,239s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/local/texlive/2018/texmf-dist
-/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2018/texmf-dist/
-fonts/type1/public/amsfonts/cm/cmbx8.pfb></usr/local/texlive/2018/texmf-dist/fo
-nts/type1/public/amsfonts/cm/cmcsc10.pfb></usr/local/texlive/2018/texmf-dist/fo
-nts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2018/texmf-dist/fon
-ts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2018/texmf-dist/font
-s/type1/public/amsfonts/cm/cmmi6.pfb></usr/local/texlive/2018/texmf-dist/fonts/
-type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2018/texmf-dist/fonts/ty
-pe1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type
-1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/p
-ublic/amsfonts/cm/cmr8.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/publ
-ic/amsfonts/cm/cmr9.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/
-amsfonts/cm/cmsy10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/a
-msfonts/cm/cmsy8.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/ams
-fonts/cm/cmti10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsf
-onts/cm/cmtt10.pfb>
-Output written on LinkagePaper.pdf (18 pages, 468388 bytes).
+ 42i,12n,38p,968b,235s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
+></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx6.pfb><
+/usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb></u
+sr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb></u
+sr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></us
+r/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr
+/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/l
+ocal/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/loc
+al/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local
+/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/te
+xlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texli
+ve/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texlive/
+2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2
+018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/201
+8/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2018
+/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
+Output written on LinkagePaper.pdf (17 pages, 473608 bytes).
 PDF statistics:
- 135 PDF objects out of 1000 (max. 8388607)
- 87 compressed objects within 1 object stream
+ 136 PDF objects out of 1000 (max. 8388607)
+ 88 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  31 words of extra memory for PDF output out of 10000 (max. 10000000)
 

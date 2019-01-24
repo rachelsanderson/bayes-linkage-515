@@ -267,14 +267,11 @@ As previously mentioned, the implied parameters for $p_M$ are different for the 
 
 This is likely because $p_M$ is sampled from the posterior according to 
 \begin{equation} p_M\ |\ \mathbf{Z} \sim \text{Beta}(\alpha_M + n_{M}(\mathbf{Z}),\ \beta_M + n_{2} - n_{M}(\mathbf{Z})) \end{equation}
-
 in the beta record linkage model.  Since $n_M(\textbf{Z})$ is bounded between $[0,20]$ across applications, the parameters of the Beta distribution are bounded between $[1,21]$ given the flat prior.  By comparison, the mixture model samples $p_M$ from \ref{cond1}, where $\sum_{(i,j)}I_{ij} \in [0,400]$ depending on the parameters tested.  As a result, the $p_M$ draws from the mixture model converge to either 0 or 1 extremely fast. 
 
+Interestingly, the shapes for $p_M{\ell}$ are different between the two models, even though they are updated in the same way.  The only way that the posterior of $p_M{\ell}$ changes is via the comparison fields $\gamma_{ij}^{\ell}$ of the record pairs currently assigned as a match.  The mixture model almost never assigns matches because $p_M$ is so low, and so the posterior distribution of $p_M{\ell}$ is updated only a very small amount.  Since the posterior distribution of $p_M$ does not collapse to 0 in the beta record linkage model, $p_{M\ell}$ does get updated, but the updates skew the values toward 0 (THINK ABOUT GIBBS SAMPLER AND WHY THIS HAPPENS> Could the algorithm be forcing too many acceptances?)  
+
 % PLOT NUMBER OF MATCHES FOR BPM? 
-
-% FINISH PML PART
-Interestingly, the shapes for $p_M{\ell}$ are different not In the Beta Record Linkage model, the posterior density of $p_M$ remains rather flat, and the posterior densities for $p_{M\ell}$  look like a $\chi^2$ distribution. 
-
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[width=\textwidth]{../Figures/bpm/nM9/ZmatchesnM9_L3.png}
@@ -302,54 +299,24 @@ for all $(i,j)\in X_1\times X_2$.  Figure \ref{Ztrace} shows that even when almo
 
 \subsection{Mixture Models}
 
-A significant limitation of the mixture model approach is that there is no guarantee that the clusters will correspond to matches and non-matches.  Although this is a criticism about mixture models in general, this proved to be an issue in even the most simple datasets I generated.
+A significant limitation of the mixture model approach is that there is no guarantee that the clusters will correspond to matches and non-matches.  Although this is a criticism about mixture models and clustering techniques in general, this label degeneracy produced confusing results for even the most simple datasets I tested.  
 
-In practice, 3-component mixtures tend to work better, even though theoretically we would like two.  Winkler (2002) mentioned conditions for the mixture model to give good results: the proportion of matches should be greater than 5\%, the classes of matches and non-matches should be well-separated, typographical errors must be relatively low, there must be redundant fields that overcome errors in other fields, among others. 
+Another disadvantage of the mixture model approach presented here is that $\mathbf{I}$ potentially matches a file $i\in X_1$ with multiple files in $X_2$ and vice versa. Even if the mixture model is fitted with a one-to-one constraint, using the ``optimal" decision rule from \ref{fs1969} may lead to many-to-many assignments.  One-to-one matches must be assigned post-processing using a linear sum assignment program that uses the estimated log-likelihood ratios $w_{ij} = \log \left(\frac{P(\gamij | M)}{P(\gamij | U)}\right)$ as weights.  
 
-Many-to-one matches can still happen unless the linear sum assignment is used.  
-
-Another issue with mixture models is that, even if mixture model is fitted with the one-to-one constraint, the FS decision rule alone may lead to many-to-many assignments.  The linkage decision for the pair $(i,j)$ not only depends on $\gamma_{ij}$ but on the other pairs. 
+These issues aside, results from my paper show that the mixture model chains converged quickly (both in terms of number of iterations and in time spent running the Gibbs sampler), and that the posterior distributions for the identified variables were reasonably accurate.  Given these advantages, the mixture model approach may serve as an easy-to-implement counterpart to deterministic record linkage methods.
 
 \subsection{Beta Record Linkage}
-\cite{sadinle_2017} uses beta record linkage to match files with sizes $n_1 = 4,430, n_2 = 1,324$ which gives $5,852,080$ record pairs.  He claims that his chains converged after just 2,000 iterations of the Gibbs Sampler based on Geweke's convergence diagnostic as implemented in \texttt{R} package \texttt{coda}.  Based on my own preliminary results, I am skeptical of this claim. 
+ \cite{sadinle_2017} uses beta record linkage to match files with sizes $n_1 = 4,430, n_2 = 1,324$ which gives a total $5,852,080$ record pairs.  He claims that his chains converged after just 2,000 iterations of the Gibbs Sampler based on Geweke's convergence diagnostic as implemented in \texttt{R} package \texttt{coda}.  Based on my own preliminary results, I am slightly skeptical of this claims, however I look forward to comparing his Gibbs sampler code with my own. 
 
-In future versions of this paper, I will explore how to apply similar functions to my output, or write a custom module that calculates the appropriate convergence criteria from \cite{brooks_gelman_1998} and  \cite{gelman_rubin_1992}.
-
-
-
-I would like to explore the possibility of using Dirichlet distributions to model to the comparison vectors, or by using some sort of machine learning. 
-
-%%% WHERE TO PUT
-\subsection{Interpreting the results}  For a candidate pair $(i,j)$, the posterior probability of a match is $P(I_{ij}  = 1 | p_M, p_{M\ell}, p_{U\ell}) = \frac{1}{K}\sum_k I_{ij}^{(k)}$.  Options for designating matches are to (1) designate all candidate pairs exceeding a cutoff as matches, or (2) use a linear program to enforce one-to-one matching. 
-
-\subsection{Enforcing one-to-one assignment}
-
-The FS decision rule does not enforce the maximum one-to-one assignment that is desirable in many economic applications.  In practice, the optimal assignment of record pairs is obtained by solving the linear sum assignment problem: 
-\begin{gather*}
-%fix the fact that DELTA w_{ij} here is different than above
-\max_{\Delta} \sum_{i=1}^{n_1}\sum_{j=1}^{n_2} w_{ij} \Delta_{ij}\\
-\text{subject to } \Delta_{ij} \in \{0,1\}; \sum_{i=1}^{n_1} \Delta_{ij} \leq 1, \ j=1, \dots, n_2 \\ \text{and } \sum_{j=1}^{n_2} \Delta_{ij} \leq 1, \ i=1, \dots, n_1 
-\end{gather*} 
-
-where the constraints ensure that $\Delta$ represents a bipartite matching.  The output of this step is a bipartite matching that maximizes the sum of the weights $w_{ij}$ among matched pairs, and the pairs that are not matched.  Sadinle (2017) shows that this can be thought of as the MLE under the assumption that the comparison vectors are conditionally independent given the bipartite matching. %try to understand this  
-
-
-\subsection{Extensions}
-\subsubsection{Machine learning} Other option is to use training data to obtain the weights.  Another is to apply mixture models to the comparison vectors directly.  This latter method is favorable because in many contexts training data is not available, or creating a sufficiently large, representative training data set is costly.  
-\subsubsection{Looking at bias}
-Scheuren and Winkler (1993) and Lahiri and Larsen (2005) propose bias-corrected estimators of coefficients in a linear regression model given data from a probabilistically linked file. 
-
-\subsubsection{missing data}
-\subsubsection{Real data} Now that I have verified that the simple gibbs sampler works, perhaps the most obvious extension will be to extend these techniques to real data. 
-The techniques are tested first using a synthetic data generator developed by Christen and Pudjijono (2009) and Christen and Vatsalan (2013), and then with two real datasets from Enamorado (2018) and Enamorado, Fifield and Imai (2018). 
-\begin{enumerate}
-\item In the first empirical application I merge two datasets on local-level candidates for the 2012 and 2016 municipal elections in Brazil.  Each dataset contains more than 450,000 observations with a perfectly-recorded unique identifier, the Brazilian individual taxpayer registration identification number (called the \textit{Cadastro de Pessoas F\'isicas}).  All other common identifiers are manually entered into the database, so they may contain errors.  
-
-\item In the second application, I merge the 2016 American National Election Study(ANES) with a nationwide voter file containing over 160 million voter records.  
-\end{enumerate}
-%(CHECK THIS ETC) To be written. 
-
+Despite the fact that my MCMC chains had not yet converged after 100,000 draws, I am optimistic about the beta record linkage model.  I think that the issues result form the version of the Gibbs sampler that I wrote.  For computational simplicity, I implemented a Gibbs sampler which chooses at random whether to add, drop, or switch a matching record pair in $\mathbf{Z}$.   I think that implementing some of the ``smarter" steps recommended in \cite{larsen_2005}, even if they are more computationally intensive, will help the chains converge faster.
+  
 \section{Conclusion}
+
+My motivation for studying Bayesian record linkage techniques was to learn how Bayesian methods may be used to evaluate how linkage rules may introduce bias in  econometric analyses.  
+
+My next steps will be to (1) apply these techniques to real data, and (2) see how they can be used with Scheuren and Winkler (1993) and Lahiri and Larsen (2005) propose bias-corrected estimators of coefficients in a linear regression model given data from a probabilistically linked file. 
+
+Another area of interested is how to perform linkage in the presence of missing data.  \ref{sadinle_2017} gives a framework that accounts for missing data, but there is possibly more to do. 
 
 Referee for Belin (93): ``every gain which is achieved by a superior record linkage procedure must be justified by the cost of implementing that procedure". 
 
