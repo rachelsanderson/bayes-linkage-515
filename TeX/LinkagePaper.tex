@@ -32,11 +32,9 @@
 
 Ask any economist who works with survey or administrative data how they handle imperfect matches when performing a one-to-one merge, and you will get a different answer.  Some pick the matches that they believe are most likely to be correct.  Some estimate the same model using multiple configurations of matched data.  Others avoid the issue entirely, by dropping all matches that are flagged during the automated merge processes in R or Stata.  There is no one-size-fits-all solution for data merging, nor a formal theory about how subjective decisions in the merging process may introduce bias or uncertainty into estimation and inference in economic models. 
 
-The process of joining records from multiple data sources that describe the same entity appears in many fields, such as statistics, computer science, operations research, and epidemiology, under many names, such as record linkage, data linkage, entity resolution, instance identification, de-duplication, merge/purge processing, and reconciliation.    In econometrics, the process is commonly referred to as ``data combination", although literature notably lacking, despite the increasing availability of large administrative datasets \citep{ridder_moffitt_2007}.
+This ```merging" problem of joining records from multiple data sources that describe the same entity appears in many fields, such as statistics, computer science, operations research, and epidemiology, under many names, such as record linkage, data linkage, entity resolution, instance identification, de-duplication, merge/purge processing, and entity reconciliation.    In econometrics, these topics fall under the umbrella of ``data combination", and its importance is growing with the increasing availability of large administrative datasets \citep{ridder_moffitt_2007}.  While there are many record linkage techniques, there is little understanding of how these techniques may bias inference, or how researchers should handle these issues in practice.  Examining Bayesian record linkage tools is a promising place to start, as they provide a coherent framework for incorporating uncertainty at every point of the analysis.  
 
-There are now many solutions to the record linkage problem, and yet little understanding of how these techniques may introduce sample selection bias, and how researchers should handle these issues in practice.  Examining Bayesian record linkage tools is a promising place to start, as they provide a coherent framework for incorporating uncertainty at every point of the analysis.  
-
-In this paper, I review and implement the Bayesian record linkage procedures from \cite{larsen_rubin_2001} and \cite{sadinle_2017} to obtain a posterior distribution over the bipartite matching/sets of matches vs. non-matches. I use simulated data (and maybe a real data set if I have time).  I analyze adjustments for what makes a better match and compare them to traditional techniques.
+In this paper, I review and implement two Bayesian record linkage procedures from \cite{larsen_rubin_2001} and \cite{sadinle_2017} to obtain a posterior distribution over the bipartite matching/sets of matches vs. non-matches. I use simulated data (and maybe a real data set if I have time).  I analyze adjustments for what makes a better match and compare them to traditional techniques.
 
 Then, with these posteriors, I perform a basic regression analysis using methods from \cite{lahiri_larsen_2005} and \cite{tancredi_liseo_2015} \cite{tancredi_liseo_2011} about how to propagate uncertainty from the matches into a basic regression analysis.   
 %also tancredi liseo 2015
@@ -47,36 +45,28 @@ I (1) review the two methods
 
 \section{Setup}
 
-% this here 
-There are many ways to approach this (REFERNECES), I use the setup considered in Fellegi and Sunter. 
-% end
-
-Consider two datafiles $X_1$ and $X_2$ that record information from two overlapping sets of individuals or entities.  The files originate from two record-generating processes that may induce errors and missing values, so that identifying which individuals are represented in both $X_1$ and $X_2$ is nontrivial.  I assume that individuals appear at most once in each datafile, so that the goal of record linkage is to identify which records in files $X_1$ and $X_2$ refer to the same entities\footnote{If not, one would perform first de-duplication, another topic}.  
+Consider two datafiles $X_1$ and $X_2$ that record information from two overlapping sets of individuals or entities.  The files originate from two record-generating processes that may induce errors and missing values, so that identifying which individuals are represented in both $X_1$ and $X_2$ is nontrivial.  I assume that individuals appear at most once in each datafile, so that the goal of record linkage is to identify which records in files $X_1$ and $X_2$ refer to the same entities.
 
 Suppose that files $X_1$ and $X_2$ contain $n_1$ and $n_2$ records, respectively, and without loss of generality that $n_1 \geq n_2$.  Denote also the number of entities represented in both files as $n_{M}$, so that $n_2\geq n_M \geq 0$. 
 
-According to the probabilistic record linkage framework of Fellegi and Sunter (1969), the set of ordered record pairs $X_1 \times X_2$ is the union of two disjoint sets, \textit{matches} $(M)$ and \textit{non-matches} $(U)$:
+Following the probabilistic record linkage framework of \cite{fs1969}, we say that the set of ordered record pairs $X_1 \times X_2$ is the union of two disjoint sets, \textit{matches} $(M)$ and \textit{non-matches} $(U)$:
 \begin{align*} M &= \{(i,j): i\in X_1, j\in X_2, i=j\} \\ U &= \{(i,j): i\in X_1, j\in X_2, i\neq j\}\end{align*} 
 
-A record pair $(i,j) \in X_1\times X_2$ is evaluated according to $L$ different comparison criteria, which arise from comparing various data fields for $i$ and $j$, such as first name, last name, address, or social security number, if $i$ and $j$ represent people.  These comparisons are represented by a \textit{comparison vector}, $$\mathbf{\gamma_{ij}}= (\gamma_{ij}^1, \dots, \gamma_{ij}^{\ell}, \dots, \gamma_{ij}^L)$$  The comparison criteria may be binary, as in ``$i$ and $j$ have the same birthday", or factor variables that account for partial agreement between strings (see \citealp{winkler90}, for details).  The models presented herein use only binary comparison vectors, however they can be extended to allow for partial agreement using the framework from \cite{sadinle_2017}.
+Hence, the formal goal of record linkage is to identify whether an arbitrary record pair $(i,j)\in X_1\times X_2$ belongs to $M$ or $U$. 
+
+To perform this task, each record pair is evaluated according to $L$ different comparison criteria, which are the result of comparing data fields for records $i$ and $j$.  For example, if a record pair $(i,j)$ represents two individuals, the pair may be evaluated according to whether they share a first name or have the same birthday.  These comparisons are represented by a \textit{comparison vector}, $$\mathbf{\gamma_{ij}}= (\gamma_{ij}^1, \dots, \gamma_{ij}^{\ell}, \dots, \gamma_{ij}^L)$$  where each comparison field $\gamma_{ij}^{\ell}$ may be binary-valued, as in ``$i$ and $j$ have the same birthday," or use levels to account for partial agreement between strings (see \citealp{winkler90}, for details).  The models presented herein use only binary comparison vectors, however they may be extended to allow for partial agreement using the methods from \cite{sadinle_2017}.
 
 The probability of observing a particular configuration of $\gamij$ can be modeled as arising from the mixture distribution:
 \begin{equation}
 P(\gamij) = P(\gamij | M) p_M + P(\gamij | U) p_U 
 \label{mm}
 \end{equation}
-where $P(\gamma_{ij} | M)$ and $P(\gamma_{ij} | U)$ are the probabilities of observing the pattern $\gamma_{ij}$ conditional on the record pair $(i,j)$ belonging to $M$ or $U$, respectively.  The proportions $p_M$ and $p_U = 1-p_M$ are the marginal probabilities of observing a matched or unmatched pair.  
-
-Applying Bayes' Rule, we obtain the probability of $(i,j) \in M$ conditional on observing $\gamij$:
+where $P(\gamma_{ij} | M)$ and $P(\gamma_{ij} | U)$ are the probabilities of observing the pattern $\gamma_{ij}$ conditional on the record pair $(i,j)$ belonging to $M$ or $U$, respectively.  The proportions $p_M$ and $p_U = 1-p_M$ are the marginal probabilities of observing a matched or unmatched pair.  Applying Bayes' Rule, we obtain the probability of $(i,j) \in M$ conditional on observing $\gamij$,
 \begin{equation} P(M | \gamij) = \frac{p_M P(\gamij | M)}{P(\gamij)} \label{bayes} \end{equation}
-So that if we can estimate the quantities in (\ref{mm}), we can estimate the probability that any two records refer to the same entity.  
+so that if we can estimate the variables in (\ref{mm}), we can estimate the probability that any two records refer to the same entity in (\ref{bayes}).  
 
 %good until here
-Once these probabilities are estimated, it is possible to perform the analysis: weighting match pairs, assigning matches via linear program that forces one-to-one assignment, or whatever else the researcher desires.
-
-This paper focuses on methods for matching that best capture uncertainty about matches.  Future work will focus on how this introduces other biases.
-
-%end 
+As shown by \cite{fs1969}, it is possible to use the estimated probabilities to construct an ``optimal" matching, given any threshold for false positive and false negative match rates.  Conversely, the probabilities also allow us to estimate the false positive rate for any configuration of matches \citep{bda3}.  Given the usefulness of the quantities in (\ref{bayes}), the next sections will introduce two methods for estimating them.
 
 \section{Simplifying assumptions}
 
@@ -84,7 +74,7 @@ Let $\mathbf{\Gamma} \equiv \{\mathbf{\gamma_{ij}}: \  (i,j) \in X_1\times X_2\}
 
 \subsection{Blocking} 
 
-Note that $\mathbf{\Gamma}$ contains potentially $n_1 \times n_2$ elements, so that calculating $\mathbf{\Gamma}$ may be computationally expensive when $X_1$ or $X_2$ is large.  In practice, researchers partition $X_1\times X_2$ into ``blocks", where only records belonging to the same block are attempted to be linked, and records belonging to different blocks are assumed to be nonmatches.  For example, postal codes and household membership are often used to define blocks in census applications, however it is important that the blocking variables are recorded without error \citep{herzog2007}.
+Note that $\mathbf{\Gamma}$ contains potentially $n_1 \times n_2$ elements, so that calculating $\mathbf{\Gamma}$ may be computationally expensive when $X_1$ or $X_2$ is large.  In practice, researchers partition $X_1\times X_2$ into ``blocks," such that only records belonging to the same block are attempted to be linked, and records belonging to different blocks are assumed to be nonmatches.  For example, postal codes and household membership are often used to define blocks when linking census files \citep{herzog2007}.  Importantly, the blocking variables should be recorded without error, and sometimes there are none available. 
 
 % this will need fixing:
 This paper assumes that no blocking is used; or, alternatively, that records are already divided into blocks that can be analyzed independently using the methods outlined below.  
@@ -92,31 +82,31 @@ This paper assumes that no blocking is used; or, alternatively, that records are
 \subsection{Conditional independence} In principle, we can model,
 \begin{align*} \gamij\  |\  M &\sim \text{Dirichlet}(\mathbf{\delta_M})\\
 \gamij\  |\  U &\sim \text{Dirichlet}(\mathbf{\delta_U}) \end{align*}
-However, there are $2^{L}-1$ possible configurations of each $\gamij$, so that $\mathbf{\delta_M}$ and $\mathbf{\delta_U}$ may be very high-dimensional if we want to allow assymetric probabilities to vary across different categories, which makes sense in many applications.  It may be possible to perform factor analysis or something... some have done this
+However, there are $2^{L}-1$ possible configurations of each $\gamij$, so that $\mathbf{\delta_M}$ and $\mathbf{\delta_U}$ may be very high-dimensional if we want to allow weights to vary across different comparison criteria.
 
-A common assumption in the literature is to define comparison fields $\ell$ so that $\gamma_{ij}^{\ell}$ are independent across $\ell$ conditional on match status (i.e. if errors in name and address are not correlated conditional on match status %talk about this
-This implies:
+A common assumption in the literature is that the comparison fields $\ell$ are defined so that $\gamma_{ij}^{\ell}$ are independent across $\ell$ conditional on match status.  This implies:
  \begin{equation} 
  P(\gamma_{ij} | C) = \prod_{\ell=1}^L P(\gamma_{ij}^{\ell} | C)^{\gamma_{ij}^{\ell}}(1-Pr(\gamma_{ij}^{\ell} | C))^{1-\gamma_{ij}^{\ell}} \hspace{20pt} C\in \{M, U\} 
  \label{eq:condInd}
  \end{equation}
-Hence the number of parameters used to describe each mixture class is reduced to $L$
- 
- % TALK ABOUT WHAT THIS IMPLIES
- 
- \section{Mixture Model Approach to Record Linkage}
+Hence the number of parameters used to describe each mixture class is reduced to $L$.  
 
- Since membership to $M$ or $U$ is not actually observed, a convenient way of simultaneously estimating $p_M, p_U$ and classifying $(i,j)$ into matches and non-matches is via mixture modeling, with mixture distributions $P(\gamij | M)$ and $P(\gamij | U)$.   %This approach was suggested by Bayesian approaches to record linkage have been suggested by Larsen (1999a, 2002, 2004, 2005), Fortini et al. (2002, 2000), and McGlinchy (2004).
+\cite{larsen_rubin_2001} have shown how to relax this assumption using log-linear models, but for now I assume conditional independence to ease computation. 
  
-\subsection{Estimation} For convenience, denote $p_{M\ell} = P(\gamma_{ij}^{\ell} | M)$ and $ p_{U\ell} = P(\gamma_{ij}^{\ell} | U)$.  Assuming conditional independence across $\ell$ (and global parameters that do not vary by block, if using blocked records), a convenient prior distribution is the product of independent Beta distributions,
+ 
+ \section{Two Bayesian Approaches to Record Linkage}
+
+\subsection{Mixture Models}  Since membership to $M$ or $U$ is not actually observed, a convenient way of simultaneously estimating $p_M, p_U$ and classifying record pairs as matches or non-matches is via mixture modeling, with mixture distributions $P(\gamij | M)$ and $P(\gamij | U)$.   %This approach was suggested by Bayesian approaches to record linkage have been suggested by Larsen (1999a, 2002, 2004, 2005), Fortini et al. (2002, 2000), and McGlinchy (2004).
+
+For convenience, denote $p_{M\ell} = P(\gamma_{ij}^{\ell} | M)$ and $ p_{U\ell} = P(\gamma_{ij}^{\ell} | U)$.  Assuming conditional independence across $\ell$ (and global parameters that do not vary by block, if using blocked records), a convenient prior distribution is the product of independent Beta distributions,
  \begin{gather*}
  p_M \sim \text{Beta}(\alpha_M, \beta_M) \\
  p_{M\ell} \sim \text{Beta}(\alpha_{M\ell}, \beta_{M\ell}), \ \ell = 1,\dots, L \\
   p_{U\ell} \sim \text{Beta}(\alpha_{U\ell}, \beta_{U\ell}), \ \ell = 1,\dots, L 
  \end{gather*}
- For $i=1,\dots,n_1 \in X_1$, $j = 1, \dots, n_2 \in X_2$ define
+ For $i=1,\dots,n_1 \in X_1$, $j = 1, \dots, n_2 \in X_2$ define the parameter of interest as,
 $$I_{ij} = \begin{cases} 1, & \text{if records $i\in X_1$ and $j\in X_2$ refer to the same entity;} \\ 0, & \text{otherwise} \end{cases} $$  
-If the match indicators $\mathbf{I}$ were known, the posterior distributions of $\left(p_M, \mathbf{p_{M\ell}, p_{U\ell}}\right)$ would be:
+If $\params$ are known, then $P(I_{ij} = 1 | \gamij \params)$ is distributed as in (\ref{bayes}).  Alternately, if the match indicators $\mathbf{I}$ were known, the posterior distributions of $\left(p_M, \mathbf{p_{M\ell}, p_{U\ell}}\right)$ would be:
 
 % pM | I
 \begin{equation}
@@ -138,8 +128,182 @@ p_{U\ell} | I \sim \text{Beta}\left(\alpha_{U\ell} + \sum_{(i,j)}(1-I_{ij})\gamm
 
 % \[ P(\mathbf{\Gamma} | \mathbf{I}) &= \prod_{(i,j)} P(\gamij | M)^{I_{ij}} P(\gamij | U)^{1-I_{ij}} \]
 
-The posterior distribution of parameters can therefore be simulated from alternating conditional distribution draws via the  Gibbs Sampling scheme in \cite{larsen_2005}.  See Appendix \ref{app:simple_gibbs} for details.
+Based on these ideas, \cite{larsen_rubin_2001} proposed a Bayesian version of record linkage for the mixture model approach, that uses a Gibbs Sampling scheme\footnote{See Appendix \ref{app:simple_gibbs}} for simulating the posterior distribution of $I,\params$. 
 
+\subsection{Beta Record Linkage}  As noted by \cite{larsen_2005}, a significant limitation of the mixture model approach is that it does not explicitly enforce one-to-one matching in the likelihood.  Intuitively, if one-to-one matching is desired, then the matching status of $(i,j)$ should depend on the the matching status of $(i,j')$ for $j\neq j'$.  The Gibbs Sampler in Appendix \ref{app:simple_gibbs} certainly violates this, since the components of $\mathbf{I}$ are sampled independently in every iteration.
+ 
+When the goal is one-to-one matching, \cite{sadinle_2017} noted that the parameter of interest $\mathbf{I}$ is better characterized as a \textit{bipartite matching}.   Furthermore, he provides conditions under which the mixture model approach, combined with an optimal assignment of record pairs obtained from a linear sum assignment problem, produces the MLE of the bipartite matching. 
+
+Formally, the bipartite matching can be represented as $\mathbf{Z}= (Z_1, Z_2,\dots, Z_{n_2})$, where
+
+\[ Z_j = \begin{cases} i, & \text{if records $i\in X_1$ and $j\in X_2$ refer to the same entity;} \\
+				n_1+i, & \text{if record $j\in X_2$ does not have a match in $X_1$} \end{cases} \]
+
+This notation is also convenient computationally because it reduces the size of the matching parameter from $n_1\times n_2$ to $n_2$. 
+
+Same as in the mixture model approach, the prior probability that $j \in X_2$ has a match is
+\begin{equation} I(Z_j \leq n_1)  \overset{i.i.d}{\sim} \text{Bernoulli}(p_M), \hspace{10pt} p_M \sim \text{Beta}(\alpha_{M}, \beta_{M}} \label{cond1} \end{equation}
+The prior on $p_M$ implies $n_{M}(Z) = \sum_{j=1}^{n_2} I(Z_j \leq n_1)$, the number of matches according to $\mathbf{Z}$ is distributed as:
+\begin{equation} n_{M}(\mathbf{Z}) \sim \text{Beta-Binomial}(n_2, \alpha_{M}, \beta_{M}) \end{equation}
+after marginalizing over $p_M$.
+
+Conditioning on $\{I(Z_j \leq n_1)\}_{j=1}^{n_2}$, all possible bipartite matchings are considered to be equally likely, so \begin{equation} Pr\left(\mathbf{Z} | n_{M}\right) = \left(\frac{n_1!}{(n_1-n_{M})!}\right)^{-1} \label{cond3} \end{equation}
+
+Together conditions (\ref{cond1})-(\ref{cond3}) imply the following prior over $\mathbf{Z}$:
+\begin{equation}Pr(\mathbf{Z} | \alpha_M, \beta_M) = \frac{(n_1-n_{M}(\mathbf{Z}))!}{n_1!}\frac{\text{Beta}(n_{M}(\mathbf{Z}) + \alpha_M,\ n_2-n_{M}(\mathbf{Z}) + \beta_M)}{\text{Beta}(\alpha_M, \beta_M)} \label{brl} \end{equation}
+
+It is because of the prior in (\ref{brl}) that \cite{sadinle_2017} refers to his methods as \textit{beta record linkage}. 
+
+To estimate the model, I use the Gibbs Sampling scheme outlined in \cite{larsen_2005}, which I have reproduced in Appendix \ref{app:gibbsB}.  It is very similar to the Gibbs Sampler for estimating the mixture model, however the drawing  from the conditional distribution of $\mathbf{Z}$ is significantly more challenging (and computationally intensive) than sampling from the conditional distribution of $\mathbf{I}$.  
+
+\section{Simulation Study}
+
+To compare the performance of the mixture model approach with the beta record linkage model, I wrote Python scripts that implement the Gibbs Samplers described in Appendices \ref{app:simple_gibbs} and \ref{app:gibbsB}.  I also wrote scripts to generate fake data using different parameter combinations so I could study how the methods perform across multiple datasets.   Detailed documentation for all relevant programs is available in \texttt{README.md} submitted with this paper. 
+
+\subsection{Data}
+
+For each combination of parameters in Table \ref{params}, I generated a dataset by randomly selecting $n_M = p_M n_2$ records from $X_2$ and $n_M$ records from $X_1$ and assigning them as matches.  For these record pairs, I generated $\gamij$ according to
+ $$\gamma_{ij}^{\ell} \ | \ M \overset{i.i.d.}{\sim}\text{Bernoulli}(p_{M\ell}), \hspace{10pt}\ell = 1,\dots L$$ 
+For the remaining $(n_1n_2 - n_M)$ record pairs, I generated $\gamij$ from
+  $$\gamma_{ij}^{\ell} \ | \ U \overset{i.i.d.}{\sim}\text{Bernoulli}(p_{U\ell}), \hspace{10pt}\ell = 1,\dots L$$ 
+For this paper, I tested $p_{M\ell} = 0.9$ and $p_{U\ell}=0.2$ for all $\ell$ and all datasets, however my Python programs allow for more flexible choices.  Future versions of this paper will study different values of $p_{M\ell}, p_{U\ell}$, file sizes $n_1$ and $n_2$, and levels of overlap between files. 
+
+\begin{table}[h!]
+\caption{Parameter combinations and time to perform 100,000 iterations (in seconds)}
+\begin{center}
+\begin{tabular}{cccccc|cc}
+\toprule
+ $L$ &  $n_1$ &  $n_2$ &  $p_M$ &  $p_{M\ell}$ &  $p_{U\ell}$ & MM & BPM \\
+\midrule
+ 2 &  10 &  10 &  0.2 &  0.9 &  0.2 & 237 & 4174 \\
+ 3 &  10 &  10 &  0.2 &  0.9 &  0.2 & 292 & 4315 \\
+ 4 &  10 &  10 &  0.2 &  0.9 &  0.2 & 329 & 4361 \\ 
+ 5 &  10 &  10 &  0.2 &  0.9 &  0.2 & 379 & 4417 \\ 
+ 2 &  20 &  20 &  0.5 &  0.9 &  0.2 &  900 & 14967 \\ 
+ 3 &  20 &  20 &  0.5 &  0.9 &  0.2 & 1274 & 18643 \\ 
+ 4 &  20 &  20 &  0.5 &  0.9 &  0.2 & 1490 & 18618\\
+ 5 &  20 &  20 &  0.5 &  0.9 &  0.2 & 1469 & 15470 \\
+ 2 &  10 &  10 &  0.9 &  0.9 &  0.2 &  242 & 4246 \\
+ 3 &  10 &  10 &  0.9 &  0.9 &  0.2 & 289 & 4255 \\
+ 4 &  10 &  10 &  0.9 &  0.9 &  0.2 & 334 & 4327 \\
+ 5 &  10 &  10 &  0.9 &  0.9 &  0.2 & 382 & 4249 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\label{params}
+\end{table}%
+
+\subsection{Priors} I use only flat priors for my analysis, $(\alpha_M=\beta_M=\alpha_{M\ell}=\beta_{M\ell}=\alpha_{U\ell}=\beta_{U\ell}=1$), however, my programs will also allow for more informed priors.  FUTURE VERSIONS MIGHT TRUNCATE. %TO DO (jupyter notebook?)  Some small scale simulations showed that my results were extremely sensitive/not sensitive to piror. 
+
+% Note on computation here? 
+
+\section{Results}
+
+For each dataset, I perform Gibbs sampling according to the Mixture Modeling and Beta Record linkage approaches.  Unless otherwise specified I use a burn-in of 5,000. Here is what I find, 
+
+\subsection{Mixture Model} 
+
+\subsubsection{Convergence} To evaluate convergence for the mixture models, I look at the trace plots of $\params$.  A common pattern across all chains is that $p_M$ converges to values near 0 or 1 within a few initial draws, and then stays close to that value for all remaining draws.  Additionally, one of $p_{M\ell}$ or $p_{\ell}$ oscillates between 0 and 1 for all draws, while the other oscillates between 0.15 and 0.35.  A--n example of this is Figure \ref{mmConverge}. 
+  
+Aside from the strange pattern of $p_M$, my posterior density estimates are robust to different burn-in amounts, which suggests that all parameters are either stuck or, in some sense, converged.  It may be possible to rewrite the sampler to avoid this issue,  however there are deeper issues about the model such that it did not merit the effort.\footnote{I tried fixing this in earlier versions of the code, by adding 1 to the denominator when sampling from $P(\mathbf{I} | \params)$ if $p_M$ was converging to 1 too quickly.} 
+
+% MM trace plots
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=\textwidth]{../Figures/mm/nM10/allTrace_nM10_L4.png}
+\caption{Trace plots for 100,000 draws of $\params$ with true values of $\longparam = (4,20,20,0.5,0.9,0.2)$ and no burn-in}
+\label{mmConverge}
+\end{center}
+\end{figure}
+
+\subsubsection{Identifiability} For each parameter combination tested, the posterior densities and trace plots for $(p_{M1}, \dots, p_{ML})$ and $(p_{U1}, \dots, p_{UL})$ appear to be about the same across $\ell$.  This accurately reflects the data generating process, since $p_{M\ell}$ and $p_{U\ell}$ are fixed across $\ell$.  Across parameter combinations, however, the posterior densities for $p_{M\ell}$ and $p_{U\ell}$ flip.  For example, in Figure \ref{mmLarge}, the posterior density for $p_{M\ell}$ is approximately Uniform(0,1), while $p_{U\ell}$ is approximately normally distributed with mean 0.22.  Yet for $L=2$ and $L=3$ (and all other parameters unchanged), the roles of $M$ and $U$ flip (Figure \ref{mmFlips})
+
+This example illustrates that identifiability is an issue.  First, there is the issue of label degeneracy, which is the fact that the estimated ``M" mixture may actually be the ``U" mixture if I do not impose additional restrictions.  A deeper issue is that in each of my datasets, there are between 2-10 matched record pairs, out of 100-400 possible links.  
+
+% May be useful to use a logit function? Values are very close to 0.  Estimating small probabilities is hard. 
+
+\subsubsection{Matching and matching weights, Posteriors}
+
+% NEED TO LOOK AT THE IMPLIED WEIGHTS FROM THIS MODEL
+
+% figures for nM = 10, dim(Gamma) = 200 pM =0.5, L = 5
+% mm 
+
+
+%MM FLIPS
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=\textwidth]{../Figures/mm/nM10/allParam_nM10_L3.png}
+\vspace{-40pt}
+\caption{Histogram of 100,000 draws (burn-in = 5,000) from mixture model for all parameters with true parameter values $(L, n_1, n_2, p_M, p_{M\ell}, p_{U\ell}) = (3, 20, 20, 0.5, 0.9, 0.2)$ and independent, flat priors}
+\label{mmFlips}
+\end{center}
+\end{figure}
+
+\subsection{Posterior Densities}
+The posterior densities for $p_{U\ell}$ in Figures \ref{mmLarge} and \ref{bpmLarge} are virtually identical for both models.  This is true for all combinations of parameters (although, as mentioned above, sometimes the $U$ and $M$ is flipped in the mixture model for $L$ small).  In the Beta Record Linkage model, the posterior density of $p_M$ remains rather flat, and the posterior densities for $p_{M\ell}$  look like a $\chi^2$ distribution. 
+
+% MM  ALLparam - posterior densities
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=0.9\textwidth]{../Figures/mm/nM10/allParam_nM10_L5.png}
+\vspace{-40pt}
+\caption{Histogram of 100,000 draws (burn-in = 5,000) from mixture model for all parameters with true parameter values $(L, n_1, n_2, p_M, p_{M\ell}, p_{U\ell}) = (5, 20, 20, 0.5, 0.9, 0.2)$ and independent, flat priors}
+\label{mmLarge}
+\end{center}
+\end{figure}
+
+%bpm - posterior densities
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=0.9\textwidth]{../Figures/bpm/nM10/allParam_nM10_L5.png}
+\caption{Histogram of 100,000 draws (burn-in = 5,000) from Beta Record Linkage model for all parameters and likelihood of $Z$ with true parameter values $(L, n_1, n_2, p_M, p_{M\ell}, p_{U\ell}) = (5, 20, 20, 0.5, 0.9, 0.2)$ and independent, flat priors}
+\label{bpmLarge}
+\end{center}
+\end{figure}
+
+\subsection{Beta Record Linkage}
+\subsubsection{Convergence}  Figure \ref{bpmTrace} shows the trace plots for $\params$ and the likelihood of $Z$ from the last 15,000 draws.  It appears that $p_{U\ell}$ mixes well, but that there are slow-moving trends in $p_M, p_{M\ell}$ and the likelihood.  This suggests that the chains have not converged. 
+
+\cite{sadinle_2017} uses Beta Record Linkage with $n_1 = 4,430, n_2 = 1,324$ which gives $5,852,080$ record pairs.  He finds that he has converged after just 2,000 iterations of the Gibbs Sampler based on Geweke's convergence diagnostic as implemented in \texttt{R} package \texttt{coda}.  In future versions of this paper, I will explore how to apply similar functions to my output, or write a custom module that calculates the appropriate convergence criteria from \cite{brooks_gelman_1998} and  \cite{gelman_rubin_1992}.
+
+%bpm - trace plots
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=\textwidth]{../Figures/bpm/nM10/allTrace_nM10_L3.png}
+\caption{Trace plot of draws 85,000-100,000 for $\params$ and the likelihood of $Z$ from a Beta Record Linkage model with true parameters $(L, n_1, n_2, p_M, p_{M\ell}, p_{U\ell}) = (5, 20, 20, 0.5, 0.9, 0.2)$ }
+\label{bpmTrace}
+\end{center}
+\end{figure}
+
+% z - barplot
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=\textwidth]{../Figures/bpm/nM9/ZmatchesnM9_L3.png}
+\caption{Histogram of $Z$ draws for bipartite matching from a Beta Record Linkage model with true parameters $(L, n_1, n_2, p_M, p_{M\ell}, p_{U\ell}) = (3, 10, 10, 0.9, 0.9, 0.2)$ }
+\label{Ztrace}
+\end{center}
+\end{figure}
+
+\subsubsection{Posterior match probabilities} 
+
+The estimated posterior probability of $(i,j) \in M$ is:
+$$ \frac{\# \text{ iterations that } Z_j = i}{\text{total \# of iterations}} $$
+for all $(i,j)\in X_1\times X_2$.  Figure \ref{Ztrace} shows that even when almost all records have a match $(p_M = 0.9)$, the posterior probability that any record is assigned a match is low.  Conditional on being assigned a match in a draw, however, the posterior seems to slightly favor the correct match (Figure \ref{ZtraceCond}) so that if we used a decision rule to assign matches, some of the matches may be correctly assigned.  Given that the chain has not converged, this seems to be promising, albeit not ideal. 
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=\textwidth]{../Figures/bpm/nM9/ZmatchesnM9_L3_cond.png}
+\caption{Histogram of $Z$ draws for bipartite matching (conditional on being matched) from a Beta Record Linkage model with true parameters $(L, n_1, n_2, p_M, p_{M\ell}, p_{U\ell}) = (3, 10, 10, 0.9, 0.9, 0.2)$ }
+\label{ZtraceCond}
+\end{center}
+\end{figure}
+
+
+\section{Discussion}
+
+%%% WHERE TO PUT
 \subsection{Interpreting the results}  For a candidate pair $(i,j)$, the posterior probability of a match is $P(I_{ij}  = 1 | p_M, p_{M\ell}, p_{U\ell}) = \frac{1}{K}\sum_k I_{ij}^{(k)}$.  Options for designating matches are to (1) designate all candidate pairs exceeding a cutoff as matches, or (2) use a linear program to enforce one-to-one matching. 
 
 
@@ -166,182 +330,9 @@ The FS decision rule does not enforce the maximum one-to-one assignment that is 
 \end{gather*} 
 
 where the constraints ensure that $\Delta$ represents a bipartite matching.  The output of this step is a bipartite matching that maximizes the sum of the weights $w_{ij}$ among matched pairs, and the pairs that are not matched.  Sadinle (2017) shows that this can be thought of as the MLE under the assumption that the comparison vectors are conditionally independent given the bipartite matching. %try to understand this  
-
-\section{Beta Record Linkage \citep{sadinle_2017}}
-
-The main disadvantage of the mixture model approach is that it does not enforce one-to-one matching.  Intuitively, if a one-to-one matching is desired, then the matching status of $(i,j)$ should affect the matching status of $(i,j')$.  Yet the mixture model approach does not allow for this.  
-
-This issue was noted by \cite{larsen_2005} and \cite{sadinle_2017}.  Formally, the parameter of interest is a bipartite matching, which can be represented compactly as a \textit{matching labeling} $Z= (Z_1, Z_2,\dots, Z_{n_2})$ for the records in file $X_2$ such that
-
-\[ Z_j = \begin{cases} i, & \text{if records $i\in X_1$ and $j\in X_2$ refer to the same entity;} \\
-				n+1, & \text{if record $j\in X_2$ does not have a match in $X_1$} \end{cases} \]
-
-\subsection{Beta Prior for Bipartite Matchings $Z$}
-
-Following \cite{larsen_2005} and \cite{sadinle_2017}.
-
-Just as in the mixture model approach, the prior probability that $j \in X_2$ is:
-
-$$ I(Z_j \leq n_1)  \overset{i.i.d}{\sim} \text{Bernoulli}(p_M)$$
-
-where $p_M$ represents the proporiton of matches expected a priori as a fraction of the smallest file $X_2$.  Same as before, the hyperprior for $p_M$ is:
-
-$$ p_M \sim \text{Beta}(\alpha_{M}, \beta_{M})$$ 
-
-The prior on $p_M$ implies $n_{12}(Z) = \sum_{j=1}^{n_2} I(Z_j \leq n_1)$, the number of matches according to matching labeling $Z$ is distributed as:
-
-$$n_{12}(Z) \sim \text{Beta-Binomial}(n_2, \alpha_{M}, \beta_{M}) $$ 
-
-after marginalizing over $p_M$.
-
-Conditioning on $\{I(Z_j \leq n_1)\}_{j=1}^{n_2}$, all possible bipartite matchings are taken to be equally likely, so $$Pr(Z\ |\ n_{12}) = \left(\frac{n_1!}{(n_1-n_{12})!}\right)^{-1}$$
-
-These conditions imply the joint prior over $Z$:
-
-$$Pr(Z\ |\ \alpha_M, \beta_M) = \frac{(n_1-n_{12}(Z))!}{n_1!}\frac{\text{Beta}(n_{12}(Z) + \alpha_M,\ n_2-n_{12}(Z) + \beta_M)}{\text{Beta}(\alpha_M, \beta_M)}$$
-
-\subsection{Gibbs sampler for bipartite matching (Larsen, 2005)}
-
-\begin{enumerate} 
-\item Pick an initial values of $p_M, p_{M\ell}, p_{U\ell}$ and a valid configuration of $Z$.  Repeat the following until convergence:
-\begin{enumerate} 
-\item Draw $p_M$ from $$ p_M\ |\ Z \sim \text{Beta}(\alpha_M + n_{M}(Z),\ \beta_M + n_{2} - n_{M}(Z)) $$ Note this is same as before. 
-
-\item  Draw $p_{M\ell}$ and $p_{U\ell}$ from their conditional distributions (same as before).
-
-\item Use Metropolis-Hastings algorithm to draw values of $Z$ and $n_{M}(Z)$ from their full conditional distributions. 
-
-\end{enumerate}
-
-\item Stop when converged. 
-\end{enumerate}
-The only difference is step 3.  We no longer draw matches according to $n_1\times n_2$ independent Bernoulli random variables.  The procedure used in this paper is exactly that from the appendix of Larsen (2005).  It is quite long, so see Appendix for details. 
+%% NOT SURE WHERE TO PUT
 
 
-\section{Data and Simulations}
-
-I wrote Python scripts that implement Gibbs sampling for the mixture model- and bipartite matching-based approaches to record linkage.  I test them on fake data with different parameters and compare the results.   Documentation is available in \texttt{README.md}. 
-\begin{table}[h!]
-\caption{Parameter combinations and time to perform 100,000 iterations (in seconds)}
-\begin{center}
-\begin{tabular}{cccccc|cc}
-\toprule
- $L$ &  $n_1$ &  $n_2$ &  $p_M$ &  $p_{M\ell}$ &  $p_{U\ell}$ & MM & BPM \\
-\midrule
- 2 &  10 &  10 &  0.2 &  0.9 &  0.2 & 237 & 4174 \\
- 3 &  10 &  10 &  0.2 &  0.9 &  0.2 & 292 & 4315 \\
- 4 &  10 &  10 &  0.2 &  0.9 &  0.2 & 329 & 4361 \\ 
- 5 &  10 &  10 &  0.2 &  0.9 &  0.2 & 379 & 4417 \\ 
- 2 &  20 &  20 &  0.5 &  0.9 &  0.2 &  900 & 14967 \\ 
- 3 &  20 &  20 &  0.5 &  0.9 &  0.2 & 1274 & 18643 \\ 
- 4 &  20 &  20 &  0.5 &  0.9 &  0.2 & 1490 & 18618\\
- 5 &  20 &  20 &  0.5 &  0.9 &  0.2 & 1469 & 15470 \\
- 2 &  10 &  10 &  0.9 &  0.9 &  0.2 &  242 & 4246 \\
- 3 &  10 &  10 &  0.9 &  0.9 &  0.2 & 289 & 4255 \\
- 4 &  10 &  10 &  0.9 &  0.9 &  0.2 & 334 & 4327 \\
- 5 &  10 &  10 &  0.9 &  0.9 &  0.2 & 382 & 4249 \\
-\bottomrule
-\end{tabular}
-\end{center}
-\label{params}
-\end{table}%
-
-\subsection{Data}
-
-For each combination of $(L, n_1, n_2, p_M, p_{M\ell}, p_{U\ell})$, in Table \ref{params}, I randomly selected $n_M = p_M n_2$ records from $X_2$ and $n_M$ records from $X_1$ and assigned them as matches.  For these record pairs, I generated $\gamij$ according to
- $$\gamma_{ij}^{\ell} \ | \ M \overset{i.i.d.}{\sim}\text{Bernoulli}(p_{M\ell}), \hspace{10pt}\ell = 1,\dots L$$ 
-For the remaining $(n_1n_2 - n_M)$ record pairs, I generated $\gamij$ from
-  $$\gamma_{ij}^{\ell} \ | \ U \overset{i.i.d.}{\sim}\text{Bernoulli}(p_{U\ell}), \hspace{10pt}\ell = 1,\dots L$$ 
-
-For the results presented here, I test $p_{M\ell} = 0.9$ and $p_{U\ell}=0.2$ for all $\ell$, however my programs also allow flexible choices.
-
-\subsection{Priors}
-
-I use a flat prior for all parameters ($\alpha_M=\beta_M=\alpha_{M\ell}=\beta_{M\ell}=\alpha_{U\ell}=\beta_{U\ell}=1$).  However, these are also flexible.  %TO DO (jupyter notebook?)  Some small scale simulations showed that my results were extremely sensitive/not sensitive to piror. 
-
-% Note on computation here? 
-
-\section{Results}
-
-For each dataset, I perform Gibbs sampling according to the Mixture Modeling and Beta Record linkage approaches.  Unless otherwise specified I use a burn-in of 5,000. Here is what I find, 
-
-\subsection{Mixture Model} 
-
-\subsubsection{Convergence} To evaluate convergence for the mixture models, I look at the trace plots of $\params$.  A common pattern across all chains is that $p_M$ converges to values near 0 or 1 within a few initial draws, and then stays close to that value for all remaining draws.  Additionally, one of $p_{M\ell}$ or $p_{\ell}$ oscillates between 0 and 1 for all draws, while the other oscillates between 0.15 and 0.35.  A--n example of this is Figure \ref{mmConverge}. 
-  
-Aside from the strange pattern of $p_M$, my posterior density estimates are robust to different burn-in amounts, which suggests that all parameters are either stuck or, in some sense, converged.  It may be possible to rewrite the sampler to avoid this issue,  however there are deeper issues about the model such that it did not merit the effort.\footnote{I tried fixing this in earlier versions of the code, by adding 1 to the denominator when sampling from $P(\mathbf{I} | \params)$ if $p_M$ was converging to 1 too quickly.} 
-
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[width=\textwidth]{../Figures/mm/nM10/allTrace_nM10_L4.png}
-\caption{Trace plots for 100,000 draws of $\params$ with true values of $\longparam = (4,20,20,0.5,0.9,0.2)$ and no burn-in}
-\label{mmConverge}
-\end{center}
-\end{figure}
-
-\subsubsection{Identifiability} For each parameter combination tested, the posterior densities and trace plots for $(p_{M1}, \dots, p_{ML})$ and $(p_{U1}, \dots, p_{UL})$ appear to be about the same across $\ell$.  This accurately reflects the data generating process, since $p_{M\ell}$ and $p_{U\ell}$ are fixed across $\ell$.  Across parameter combinations, however, the posterior densities for $p_{M\ell}$ and $p_{U\ell}$ flip.  For example, in Figure \ref{mmLarge}, the posterior density for $p_{M\ell}$ is approximately Uniform(0,1), while $p_{U\ell}$ is approximately normally distributed with mean 0.22.  Yet for $L=2$ and $L=3$ (and all other parameters unchanged), the roles of $M$ and $U$ flip (Figure \ref{mmFlips})
-
-This example illustrates that identifiability is an issue.  First, there is the issue of label degeneracy, which is the fact that the estimated ``M" mixture may actually be the ``U" mixture if I do not impose additional restrictions.  A deeper issue is that in each of my datasets, there are between 2-10 matched record pairs, out of 100-400 possible links.  
-
-% May be useful to use a logit function? Values are very close to 0.  Estimating small probabilities is hard. 
-
-\subsubsection{Matching and matching weights}
-
-% NEED TO LOOK AT THE IMPLIED WEIGHTS FROM THIS MODEL
-
-% figures for nM = 10, dim(Gamma) = 200 pM =0.5, L = 5
-% mm 
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[width=0.9\textwidth]{../Figures/mm/nM10/allParam_nM10_L5.png}
-\vspace{-40pt}
-\caption{Histogram of 100,000 draws (burn-in = 5,000) from mixture model for all parameters with true parameter values $(L, n_1, n_2, p_M, p_{M\ell}, p_{U\ell}) = (5, 20, 20, 0.5, 0.9, 0.2)$ and independent, flat priors}
-\label{mmLarge}
-\end{center}
-\end{figure}
-
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[width=\textwidth]{../Figures/mm/nM10/allParam_nM10_L3.png}
-\vspace{-40pt}
-\caption{Histogram of 100,000 draws (burn-in = 5,000) from mixture model for all parameters with true parameter values $(L, n_1, n_2, p_M, p_{M\ell}, p_{U\ell}) = (3, 20, 20, 0.5, 0.9, 0.2)$ and independent, flat priors}
-\label{mmFlips}
-\end{center}
-\end{figure}
-
-
-\subsection{Beta Record Linkage}
-
-Next steps might include writing a function that calculates the effective sample size, similar to the one from the \texttt{coda} package in \texttt{R}, or that uses the implements the appropriate convergence criteria from \cite{brooks_gelman_1998} and  \cite{gelman_rubin_1992}.
-
-\subsection{How correct?}
-
-Comments - Mixture Model
-
-\begin{enumerate} 
-% nM = 2 --> increasing L does not help at least for (p_M, pML, pUL)
-\item ($n_M=2$ case, mixture model):  For $L = 2$, $p_M \to 1$ and $p_{M\ell}$ look approximately normal (but low probability), $p_{U\ell}$ is uniform.  For $L>2, \ p_M \to 0 $, $p_{U\ell}$ are approx normal and low, $p_{M\ell}$ like uniform.  This holds for all $L$.  Adding more comparison info doesn't help because not enough matches.  Seems to mix well.
-\item ($n_M=2$ case, bpm): $L=4$ case: llh bell shaped -- maybe getting stuck? Unclear. need to look at $Z's$.  $p_M$ is flat, $p_M{\ell}$ look like chi sq., pUL look like normal. %check descriptive statistics median and mode, include dnesity 
-\item in the $n_M=2$
-\end{enumerate}
-BPM:
-Patterns in $(p_M, p_{M\ell}, p_{U\ell})$ are persistent across all parameter combinations in bipartite matchings. 
-
-
-
-%bpm
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[width=0.9\textwidth]{../Figures/bpm/nM10/allParam_nM10_L5.png}
-\caption{Histogram of 100,000 draws (burn-in = 5,000) from Beta Record Linkage model for all parameters and likelihood of $Z$ with true parameter values $(L, n_1, n_2, p_M, p_{M\ell}, p_{U\ell}) = (5, 20, 20, 0.5, 0.9, 0.2)$ and independent, flat priors}
-\label{bpmLarge}
-\end{center}
-\end{figure}
-
-
-
-
-\section{Discussion}
 \subsection{How to improve the results by making more prior restrictions}
 
 It is expected that the probability of agreeing on an individual field of comparison is higher for matches than for nonmatches:
@@ -444,23 +435,6 @@ The techniques are tested first using a synthetic data generator developed by Ch
 %(CHECK THIS ETC) To be written. 
 
 
-\section{Simulations}
-Description of the fake data.  
-\subsection{Sadinle (2017) Stuff}
-What this section will include:
-\begin{enumerate}
-\item Have plots for posterior of all M and U probabilities as produced by Sadinle procedure.  Put on same graph? 
-\item Posterior probability of matches? Try doing geweke? 
-\item Plot of likelihood to show convergence
-\end{enumerate}
-
-Files will look like 
-\begin{enumerate}
-\item For each data set, generates chain of bipartite matches Z, parameters for M and U probabilities, and writes these to files
-\item File that analyzes $Z$ draws and gives posterior probability for pct correct, pct match, etc. across draws.  Can also look at individual matches (will be useful for comparing the two methods)
-\item File that produces posterior distributions for $m$ and $u$ probabilities. 
-\item Plot the likelihood to examine convergence properties.  
-\end{enumerate}
 
 \newpage
 % Appendix -- notes on computation 
@@ -485,6 +459,7 @@ Files will look like
 \begin{equation}
 Pr\left( I_{ij}^{(k+1)}=1 \Big| \gamma_{ij}\right) = Pr\left(M | \gamma_{ij}\right) = \frac{p_M^{(k)}Pr\left(\gamma_{ij} | M, p_{M\ell}^{(k)} \right)}{Pr\left(\gamma_{ij} \Big | p_M^{(k)}, p_{M\ell}^{(k)}, p_{U\ell}^{(k)}\right)}
 \end{equation} where 
+
 $$ Pr\left(\gamma_{ij} | M, p_{M\ell}^{(k)} \right) = \prod_{\ell=1}^L  \left(p_{M\ell}^{(k)}\right)^{\gamma_{ij}^{\ell}}\left(1-p_{M\ell}^{(k)}\right)^{1-\gamma_{ij}^{\ell}}$$ and the denominator is calculated according to (\ref{mm}) above. 
 \item Draw a value of $p_M^{(k+1)}$ from (\ref{eq:pM}).
 \item Draw values of $\{p_{M\ell}^{(k+1)}\}_{\ell=1}^L$ independently from (\ref{eq:pML}). 
@@ -493,7 +468,24 @@ $$ Pr\left(\gamma_{ij} | M, p_{M\ell}^{(k)} \right) = \prod_{\ell=1}^L  \left(p_
 \item Stop once the algorithm has converged.  Criteria for Convergence ARE X Y Z. %Convergence of the algorithm can be monitored by comparing distributions from multiple independent series as suggested by Gelman and Rubin (1992) and Brooks and Gelman (1998).
 \end{enumerate}
 
-\subsection{Gibbs sampler for bipartite matching}
+\subsection{Gibbs sampler for bipartite matching \citep{larsen_2005}}
+\label{app:gibbsB}
+\begin{enumerate} 
+\item Pick an initial values of $p_M, p_{M\ell}, p_{U\ell}$ and a valid configuration of $Z$.  Repeat the following until convergence:
+\begin{enumerate} 
+\item Draw $p_M$ from $$ p_M\ |\ Z \sim \text{Beta}(\alpha_M + n_{M}(Z),\ \beta_M + n_{2} - n_{M}(Z)) $$ Note this is same as before. 
+
+\item  Draw $p_{M\ell}$ and $p_{U\ell}$ from their conditional distributions (same as before).
+
+\item Use Metropolis-Hastings algorithm to draw values of $Z$ and $n_{M}(Z)$ from their full conditional distributions. 
+
+\end{enumerate}
+
+\item Stop when converged. 
+\end{enumerate}
+
+
+
 I implement the incremental method for modifying $n_M$ and $Z$ via the Metropolis-Hastings steps outlined in the appendix of Larsen (2005).  As Larsen notes, there are various Gibbs and Metropolis-Hastings sampling procedures that could generate draws from the target distribution, however most are computationally infeasible.  The following procedure is designed to cover the space of possible configurations and to produce higher probabilities of change across iterations.  
 
 The full conditional distribution of $(n_m, Z)$ is:
