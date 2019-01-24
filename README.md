@@ -21,11 +21,11 @@ Code for implementing the analysis performed in "Bayesian Record Linkage" by Rac
 # writes JSON file with desired params
 python json_writer.py L n1 n2 pM pML pUL
 
-# perform bpm gibbs sampling
-python bpm_gibbs.py ./Input/param_nMatchXX_LXX.json niters
+# analyze draws w/mixture model
+python simple_gibbs.py ./Input/Gamma_nMXX_LXX.csv niters
 
-# analyze draws
-python something here
+# perform beta record linkage
+python bpm_gibbs.py ./Input/param_nMXX_LXX.json ./Input/Gamma_nMXX_LXX.csv niters
 ```
 
 ## Outputs from code
@@ -37,7 +37,7 @@ One Paragraph of project description goes here
 First, do this locally (may require Duo verification and entering password)
 
 ```
-scp bpm_gibbs.py json_writer.py gen_data.py NET_ID@adroit.princeton.edu:~
+scp simple_gibbs.py bpm_gibbs.py json_writer.py gen_data.py NET_ID@adroit.princeton.edu:~
 ```
 
 Then ssh into the cluster by typing in
@@ -65,4 +65,4 @@ My code includes a number of slurm files (suffix .sh) which can be used to submi
 ## Acknowledgments
 
 * Many thanks to Mauricio Sadinle and Ted Enamorado for sharing data and code.
-* Special thanks to [Suyash Kumar](https://github.com/suyashkumar)
+* Special thanks to [Suyash Kumar](https://github.com/suyashkumar) for the technical and moral support
