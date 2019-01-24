@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  23 JAN 2019 22:30
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  23 JAN 2019 23:29
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -331,74 +331,62 @@ Overfull \hbox (16.06853pt too wide) in paragraph at lines 202--203
 l-low-ing re-stric-tions sug-gested by Larsen (2005): 
  []
 
-[5]
-<../Figures/mm/nM10/allTrace_nM10_L4.png, id=33, 794.97pt x 578.16pt>
+[5] [6]
+<../Figures/mm/nM10/allTrace_nM10_L4.png, id=36, 794.97pt x 578.16pt>
 File: ../Figures/mm/nM10/allTrace_nM10_L4.png Graphic file (type png)
 <use ../Figures/mm/nM10/allTrace_nM10_L4.png>
 Package pdftex.def Info: ../Figures/mm/nM10/allTrace_nM10_L4.png  used on input
- line 225.
+ line 226.
 (pdftex.def)             Requested size: 469.75502pt x 341.64958pt.
- [6]
-<../Figures/mm/nM10/allParam_nM10_L5.png, id=38, 722.7pt x 1011.78pt>
-File: ../Figures/mm/nM10/allParam_nM10_L5.png Graphic file (type png)
-<use ../Figures/mm/nM10/allParam_nM10_L5.png>
-Package pdftex.def Info: ../Figures/mm/nM10/allParam_nM10_L5.png  used on input
- line 234.
-(pdftex.def)             Requested size: 422.77664pt x 591.8812pt.
-
-Underfull \hbox (badness 3250) in paragraph at lines 236--236
-\OT1/cmr/m/sc/10.95 Figure 2.\OT1/cmr/m/n/10.95 Histogram of 100,000 draws (bur
-n-in = 5,000) from mix-ture
- []
-
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-<../Figures/bpm/nM10/allTrace_nM10_L3.png, id=39, 794.97pt x 578.16pt>
+<../Figures/bpm/nM10/allTrace_nM10_L3.png, id=38, 794.97pt x 578.16pt>
 File: ../Figures/bpm/nM10/allTrace_nM10_L3.png Graphic file (type png)
 <use ../Figures/bpm/nM10/allTrace_nM10_L3.png>
 Package pdftex.def Info: ../Figures/bpm/nM10/allTrace_nM10_L3.png  used on inpu
-t line 249.
+t line 235.
 (pdftex.def)             Requested size: 469.75502pt x 341.64958pt.
 
-Underfull \hbox (badness 2173) in paragraph at lines 250--250
-\OT1/cmr/m/sc/10.95 Figure 3.\OT1/cmr/m/n/10.95 Trace plot of draws 85,000-100,
+Underfull \hbox (badness 2173) in paragraph at lines 236--236
+\OT1/cmr/m/sc/10.95 Figure 2.\OT1/cmr/m/n/10.95 Trace plot of draws 85,000-100,
 000 for $(\OML/cmm/m/it/10.95 p[]; p[]; p[]\OT1/cmr/m/n/10.95 )$ and the
  []
 
 
-Underfull \hbox (badness 1629) in paragraph at lines 250--250
+Underfull \hbox (badness 1629) in paragraph at lines 236--236
 \OT1/cmr/m/n/10.95 like-li-hood of $\OML/cmm/m/it/10.95 Z$ \OT1/cmr/m/n/10.95 f
 rom a Beta Record Link-age model with true pa-ram-e-ters
+ []
+
+<../Figures/mm/nM10/allParam_nM10_L5.png, id=39, 722.7pt x 1011.78pt>
+File: ../Figures/mm/nM10/allParam_nM10_L5.png Graphic file (type png)
+<use ../Figures/mm/nM10/allParam_nM10_L5.png>
+Package pdftex.def Info: ../Figures/mm/nM10/allParam_nM10_L5.png  used on input
+ line 244.
+(pdftex.def)             Requested size: 422.77664pt x 591.8812pt.
+
+Underfull \hbox (badness 3250) in paragraph at lines 246--246
+\OT1/cmr/m/sc/10.95 Figure 3.\OT1/cmr/m/n/10.95 Histogram of 100,000 draws (bur
+n-in = 5,000) from mix-ture
  []
 
 <../Figures/bpm/nM10/allParam_nM10_L5.png, id=40, 722.7pt x 1011.78pt>
 File: ../Figures/bpm/nM10/allParam_nM10_L5.png Graphic file (type png)
 <use ../Figures/bpm/nM10/allParam_nM10_L5.png>
 Package pdftex.def Info: ../Figures/bpm/nM10/allParam_nM10_L5.png  used on inpu
-t line 269.
+t line 254.
 (pdftex.def)             Requested size: 422.77664pt x 591.8812pt.
 
-LaTeX Warning: Float too large for page by 13.40117pt on input line 273.
+LaTeX Warning: Float too large for page by 13.40117pt on input line 258.
 
-[7 <../Figures/mm/nM10/allTrace_nM10_L4.png>]
-
-LaTeX Warning: Text page 8 contains only floats.
-
-[8 <../Figures/mm/nM10/allParam_nM10_L5.png>]
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-<../Figures/bpm/nM9/ZmatchesnM9_L3.png, id=50, 1011.78pt x 578.16pt>
+[7 <../Figures/mm/nM10/allTrace_nM10_L4.png>] [8 <../Figures/bpm/nM10/allTrace_
+nM10_L3.png>] [9 <../Figures/mm/nM10/allParam_nM10_L5.png>] [10 <../Figures/bpm
+/nM10/allParam_nM10_L5.png>]
+<../Figures/bpm/nM9/ZmatchesnM9_L3.png, id=58, 1011.78pt x 578.16pt>
 File: ../Figures/bpm/nM9/ZmatchesnM9_L3.png Graphic file (type png)
 <use ../Figures/bpm/nM9/ZmatchesnM9_L3.png>
 Package pdftex.def Info: ../Figures/bpm/nM9/ZmatchesnM9_L3.png  used on input l
 ine 280.
 (pdftex.def)             Requested size: 469.75502pt x 268.4358pt.
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-<../Figures/bpm/nM9/ZmatchesnM9_L3_cond.png, id=51, 1011.78pt x 578.16pt>
+<../Figures/bpm/nM9/ZmatchesnM9_L3_cond.png, id=59, 1011.78pt x 578.16pt>
 File: ../Figures/bpm/nM9/ZmatchesnM9_L3_cond.png Graphic file (type png)
 <use ../Figures/bpm/nM9/ZmatchesnM9_L3_cond.png>
 Package pdftex.def Info: ../Figures/bpm/nM9/ZmatchesnM9_L3_cond.png  used on in
@@ -419,19 +407,13 @@ pa-ram-e-ters
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[9 <../Figures/bpm/nM10/allTrace_nM10_L3.png>] [10] [11] [12] [13]
-(./LinkagePaper.bbl
+[11 <../Figures/bpm/nM9/ZmatchesnM9_L3.png>] [12 <../Figures/bpm/nM9/ZmatchesnM
+9_L3_cond.png>] [13] [14] (./LinkagePaper.bbl
 ./LinkagePaper.bbl:28: Misplaced alignment tab character &.
 l.28 \newblock CRC Press, Taylor &
                                    Francis Group, an informa business.
 ? 
-) [14] [15] [16] [17] [18 <../Figures/bpm/nM10/allParam_nM10_L5.png>] [19 <../F
-igures/bpm/nM9/ZmatchesnM9_L3.png>] [20 <../Figures/bpm/nM9/ZmatchesnM9_L3_cond
-.png>] (./LinkagePaper.aux)
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
- ) 
+) [15] [16] [17] [18] (./LinkagePaper.aux) ) 
 Here is how much of TeX's memory you used:
  3800 strings out of 492649
  50702 string characters out of 6129622
@@ -439,26 +421,27 @@ Here is how much of TeX's memory you used:
  7455 multiletter control sequences out of 15000+600000
  12531 words of font info for 48 fonts, out of 8000000 for 9000
  1302 hyphenation exceptions out of 8191
- 42i,12n,32p,968b,237s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
-></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb><
-/usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb><
-/usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></
-usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></u
-sr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr
-/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/l
-ocal/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/loc
-al/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/
-texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/tex
-live/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texliv
-e/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive
-/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2
-018/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/20
-18/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on LinkagePaper.pdf (20 pages, 478212 bytes).
+ 42i,12n,38p,968b,239s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/local/texlive/2018/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2018/texmf-dist/
+fonts/type1/public/amsfonts/cm/cmbx8.pfb></usr/local/texlive/2018/texmf-dist/fo
+nts/type1/public/amsfonts/cm/cmcsc10.pfb></usr/local/texlive/2018/texmf-dist/fo
+nts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2018/texmf-dist/fon
+ts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2018/texmf-dist/font
+s/type1/public/amsfonts/cm/cmmi6.pfb></usr/local/texlive/2018/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2018/texmf-dist/fonts/ty
+pe1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type
+1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/p
+ublic/amsfonts/cm/cmr8.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/publ
+ic/amsfonts/cm/cmr9.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmsy10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/a
+msfonts/cm/cmsy8.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/ams
+fonts/cm/cmti10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsf
+onts/cm/cmtt10.pfb>
+Output written on LinkagePaper.pdf (18 pages, 468388 bytes).
 PDF statistics:
- 142 PDF objects out of 1000 (max. 8388607)
- 92 compressed objects within 1 object stream
+ 135 PDF objects out of 1000 (max. 8388607)
+ 87 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  31 words of extra memory for PDF output out of 10000 (max. 10000000)
 
