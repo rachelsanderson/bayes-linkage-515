@@ -142,7 +142,7 @@ Formally, the bipartite matching can be represented as $\mathbf{Z}= (Z_1, Z_2,\d
 This notation is also convenient computationally because it reduces the size of the matching parameter from $n_1\times n_2$ to $n_2$. 
 
 Same as in the mixture model approach, the prior probability that $j \in X_2$ has a match is
-\begin{equation} I(Z_j \leq n_1)  \overset{i.i.d}{\sim} \text{Bernoulli}(p_M), \hspace{10pt} p_M \sim \text{Beta}(\alpha_{M}, \beta_{M}} \label{cond1} \end{equation}
+\begin{equation} I(Z_j \leq n_1)  \overset{i.i.d}{\sim} \text{Bernoulli}(p_M), \hspace{10pt} p_M \sim \text{Beta}(\alpha_{M}, \beta_{M} \label{cond1} \end{equation}
 The prior on $p_M$ implies $n_{M}(Z) = \sum_{j=1}^{n_2} I(Z_j \leq n_1)$, the number of matches according to $\mathbf{Z}$ is distributed as:
 \begin{equation} n_{M}(\mathbf{Z}) \sim \text{Beta-Binomial}(n_2, \alpha_{M}, \beta_{M}) \end{equation}
 after marginalizing over $p_M$.
@@ -162,86 +162,71 @@ To compare the performance of the mixture model approach with the beta record li
 
 \subsection{Data}
 
-For each combination of parameters in Table \ref{params}, I generated a dataset by randomly selecting $n_M = p_M n_2$ records from $X_2$ and $n_M$ records from $X_1$ and assigning them as matches.  For these record pairs, I generated $\gamij$ according to
+For each combination of parameters in Table \ref{params}, I generated a dataset by randomly selecting $n_M = p_M^* n_2$ records from $X_2$ and $n_M$ records from $X_1$ and assigning them as matches.  
+
+I must emphasize that this means $p_M^*$ controls the amount of overlap between the two files.  When $p_M^* = 0.9$ and $n_1=n_2 = 10$, this means all but one record in $X_2$ has a match in $X_1$.  However, these same parameter values would imply $p_M = 0.09$ according to (\ref{mm}), since there are only 9 record pairs referring to matches out of 100 possible candidate pairs.\footnote{Admittedly, this is a significant mistake on my part that I realized only after analyzing the results.}
+
+For these record pairs, I generated $\gamij$ according to
  $$\gamma_{ij}^{\ell} \ | \ M \overset{i.i.d.}{\sim}\text{Bernoulli}(p_{M\ell}), \hspace{10pt}\ell = 1,\dots L$$ 
 For the remaining $(n_1n_2 - n_M)$ record pairs, I generated $\gamij$ from
   $$\gamma_{ij}^{\ell} \ | \ U \overset{i.i.d.}{\sim}\text{Bernoulli}(p_{U\ell}), \hspace{10pt}\ell = 1,\dots L$$ 
-For this paper, I tested $p_{M\ell} = 0.9$ and $p_{U\ell}=0.2$ for all $\ell$ and all datasets, however my Python programs allow for more flexible choices.  Future versions of this paper will study different values of $p_{M\ell}, p_{U\ell}$, file sizes $n_1$ and $n_2$, and levels of overlap between files. 
+For this paper, I tested $p_{M\ell} = 0.9$ and $p_{U\ell}=0.2$ for all $\ell$ and all datasets, however my Python programs allow for more flexible choices.  
 
 \begin{table}[h!]
 \caption{Parameter combinations and time to perform 100,000 iterations (in seconds)}
 \begin{center}
-\begin{tabular}{cccccc|cc}
+\begin{tabular}{ccccccc|cc}
 \toprule
- $L$ &  $n_1$ &  $n_2$ &  $p_M$ &  $p_{M\ell}$ &  $p_{U\ell}$ & MM & BPM \\
+ $L$ &  $n_1$ &  $n_2$ &  $p_M^*$ &  $p_M$ & $p_{M\ell}$ &  $p_{U\ell}$ & MM & BRL \\
 \midrule
- 2 &  10 &  10 &  0.2 &  0.9 &  0.2 & 237 & 4174 \\
- 3 &  10 &  10 &  0.2 &  0.9 &  0.2 & 292 & 4315 \\
- 4 &  10 &  10 &  0.2 &  0.9 &  0.2 & 329 & 4361 \\ 
- 5 &  10 &  10 &  0.2 &  0.9 &  0.2 & 379 & 4417 \\ 
- 2 &  20 &  20 &  0.5 &  0.9 &  0.2 &  900 & 14967 \\ 
- 3 &  20 &  20 &  0.5 &  0.9 &  0.2 & 1274 & 18643 \\ 
- 4 &  20 &  20 &  0.5 &  0.9 &  0.2 & 1490 & 18618\\
- 5 &  20 &  20 &  0.5 &  0.9 &  0.2 & 1469 & 15470 \\
- 2 &  10 &  10 &  0.9 &  0.9 &  0.2 &  242 & 4246 \\
- 3 &  10 &  10 &  0.9 &  0.9 &  0.2 & 289 & 4255 \\
- 4 &  10 &  10 &  0.9 &  0.9 &  0.2 & 334 & 4327 \\
- 5 &  10 &  10 &  0.9 &  0.9 &  0.2 & 382 & 4249 \\
+ 2 &  10 &  10 &  0.2 & 0.02 &  0.9 &  0.2 & 237 & 4174 \\
+ 3 &  10 &  10 &  0.2 & 0.02 & 0.9 &  0.2 & 292 & 4315 \\
+ 4 &  10 &  10 &  0.2 & 0.02 & 0.9 &  0.2 & 329 & 4361 \\ 
+ 5 &  10 &  10 &  0.2 & 0.02 & 0.9 &  0.2 & 379 & 4417 \\ 
+ 2 &  20 &  20 &  0.5 & 0.05 & 0.9 &  0.2 &  900 & 14967 \\ 
+ 3 &  20 &  20 &  0.5 & 0.05 & 0.9 &  0.2 & 1274 & 18643 \\ 
+ 4 &  20 &  20 &  0.5 & 0.05 & 0.9 &  0.2 & 1490 & 18618\\
+ 5 &  20 &  20 &  0.5 & 0.05 & 0.9 &  0.2 & 1469 & 15470 \\
+ 2 &  10 &  10 &  0.9 & 0.09 & 0.9 &  0.2 &  242 & 4246 \\
+ 3 &  10 &  10 &  0.9 & 0.09 & 0.9 &  0.2 & 289 & 4255 \\
+ 4 &  10 &  10 &  0.9 & 0.09 & 0.9 &  0.2 & 334 & 4327 \\
+ 5 &  10 &  10 &  0.9 & 0.09 & 0.9 &  0.2 & 382 & 4249 \\
 \bottomrule
 \end{tabular}
 \end{center}
 \label{params}
 \end{table}%
 
-\subsection{Priors} I use only flat priors for my analysis, $(\alpha_M=\beta_M=\alpha_{M\ell}=\beta_{M\ell}=\alpha_{U\ell}=\beta_{U\ell}=1$), however, my programs will also allow for more informed priors.  FUTURE VERSIONS MIGHT TRUNCATE. %TO DO (jupyter notebook?)  Some small scale simulations showed that my results were extremely sensitive/not sensitive to piror. 
+\subsection{Priors} This paper tests only flat priors, $(\alpha_M=\beta_M=\alpha_{M\ell}=\beta_{M\ell}=\alpha_{U\ell}=\beta_{U\ell}=1$), however, my programs allow for any valid combination of hyperparameters.  
 
-% Note on computation here? 
+In future tests, I would like to try restricting the following restrictions suggested by \cite{larsen_2005}:
+\begin{enumerate}
+\item Logically, the range of $p_M$ should be restricted to be less than or equal to the smaller of the two file sizes divided by the number of pairs under the blocking structure.  In my application, which does not use blocking, this would mean truncated any draws that violate $p_M \leq \frac{\min\{n1,n2\}}{n1n_2} = \frac{1}{n_1}$, since I assumed $n_1 \geq n_2$. 
+\item The probability of a record pair agreeing on a comparison field should be no weakly greater among matches than among nonmatches.  That is, $$P(\gamma_{ij}^{\ell} | M) \geq P(\gamma_{ij}^{\ell} | U)$$ for all $\ell$.  This can be achieved by truncating the draws for $p_{U\ell}$ in the Gibbs sampler by ignoring draws that violate this condition, or by scaling $p_{M\ell}$ to be in the range $(0, p_{M\ell})$. 
+\end{enumerate}
+
+\subsection{Computation} Due to the long run time required to estimate the beta record linkage model, I performed my posterior simulation using the Adroit cluster hosted by Princeton Research Computing.   Included in my code directory is a Python script \texttt{job\_writer.py} that reads in a CSV file of parameter combinations and outputs a SLURM file that can be submitted to the cluster to run the simulations.  
+
+For each dataset, I perform 100,000 iterations for each the mixture model and beta record linkage Gibbs samplers.  Prior to submitting these jobs to the cluster, I performed the analysis on my local machine and estimated the run time to be approximately linear in $n_1\times n_2 \times L \times $ \# iterations.  This does not seem to be entirely true on the cluster, since $(L=5, n_1 = n_2 = 20)$ completed faster than $(L=3,n_1=n_2=20)$. 
+
+% FIX this
+Finally, I compute all THINGS IN LOGS ** mention from BDA3 HERE
 
 \section{Results}
 
-For each dataset, I perform Gibbs sampling according to the Mixture Modeling and Beta Record linkage approaches.  Unless otherwise specified I use a burn-in of 5,000. Here is what I find, 
-
 \subsection{Mixture Model} 
+To evaluate convergence for the mixture models, I look at the trace plots of $\params$.  A common pattern across all chains is that $p_M$ converges to values near 0 or 1 within a few initial draws, and then stays close to that value for all remaining draws, as in Figure \ref{mmConverge}.  Given the fact that the true values of $p_M$ are less than 0.09 for all datasets, this is not concerning.  The fact that $p_M$ sometimes converges to 1 is an artifact of the label degeneracy problem for mixture models; although I label my parameters with $M$ and $U$, my model cannot tell the difference.
 
-\subsubsection{Convergence} To evaluate convergence for the mixture models, I look at the trace plots of $\params$.  A common pattern across all chains is that $p_M$ converges to values near 0 or 1 within a few initial draws, and then stays close to that value for all remaining draws.  Additionally, one of $p_{M\ell}$ or $p_{\ell}$ oscillates between 0 and 1 for all draws, while the other oscillates between 0.15 and 0.35.  A--n example of this is Figure \ref{mmConverge}. 
-  
-Aside from the strange pattern of $p_M$, my posterior density estimates are robust to different burn-in amounts, which suggests that all parameters are either stuck or, in some sense, converged.  It may be possible to rewrite the sampler to avoid this issue,  however there are deeper issues about the model such that it did not merit the effort.\footnote{I tried fixing this in earlier versions of the code, by adding 1 to the denominator when sampling from $P(\mathbf{I} | \params)$ if $p_M$ was converging to 1 too quickly.} 
-
+Additionally, one of $\mathbf{p_{M\ell}}$ or $\mathbf{p_{U\ell}}$ oscillates between 0 and 1 for all draws, while the other oscillates between 0.15 and 0.35.  Because the values of $p_M$ are so low, $\mathbf{p_{M\ell}}$ is not well identified, and so its posterior is the same as the prior (Figure \ref{mmLarge}).  My Gibbs sampler, in turn, classifies almost all record pairs as non-matches, so that I effectively estimate the parameters $\mathbf{p_{U\ell}}$ using the entire sample. The resulting posteriors are approximately Normal, with $\hat{\mu} \approx 0.22,  \hat{\sigma} \approx 0.04$ across $p_{U\ell}$.
+ 
 % MM trace plots
-\begin{figure}[h!]
+\begin{figure}[htbp]
 \begin{center}
 \includegraphics[width=\textwidth]{../Figures/mm/nM10/allTrace_nM10_L4.png}
 \caption{Trace plots for 100,000 draws of $\params$ with true values of $\longparam = (4,20,20,0.5,0.9,0.2)$ and no burn-in}
 \label{mmConverge}
 \end{center}
 \end{figure}
-
-\subsubsection{Identifiability} For each parameter combination tested, the posterior densities and trace plots for $(p_{M1}, \dots, p_{ML})$ and $(p_{U1}, \dots, p_{UL})$ appear to be about the same across $\ell$.  This accurately reflects the data generating process, since $p_{M\ell}$ and $p_{U\ell}$ are fixed across $\ell$.  Across parameter combinations, however, the posterior densities for $p_{M\ell}$ and $p_{U\ell}$ flip.  For example, in Figure \ref{mmLarge}, the posterior density for $p_{M\ell}$ is approximately Uniform(0,1), while $p_{U\ell}$ is approximately normally distributed with mean 0.22.  Yet for $L=2$ and $L=3$ (and all other parameters unchanged), the roles of $M$ and $U$ flip (Figure \ref{mmFlips})
-
-This example illustrates that identifiability is an issue.  First, there is the issue of label degeneracy, which is the fact that the estimated ``M" mixture may actually be the ``U" mixture if I do not impose additional restrictions.  A deeper issue is that in each of my datasets, there are between 2-10 matched record pairs, out of 100-400 possible links.  
-
-% May be useful to use a logit function? Values are very close to 0.  Estimating small probabilities is hard. 
-
-\subsubsection{Matching and matching weights, Posteriors}
-
-% NEED TO LOOK AT THE IMPLIED WEIGHTS FROM THIS MODEL
-
-% figures for nM = 10, dim(Gamma) = 200 pM =0.5, L = 5
-% mm 
-
-
-%MM FLIPS
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[width=\textwidth]{../Figures/mm/nM10/allParam_nM10_L3.png}
-\vspace{-40pt}
-\caption{Histogram of 100,000 draws (burn-in = 5,000) from mixture model for all parameters with true parameter values $(L, n_1, n_2, p_M, p_{M\ell}, p_{U\ell}) = (3, 20, 20, 0.5, 0.9, 0.2)$ and independent, flat priors}
-\label{mmFlips}
-\end{center}
-\end{figure}
-
-\subsection{Posterior Densities}
-The posterior densities for $p_{U\ell}$ in Figures \ref{mmLarge} and \ref{bpmLarge} are virtually identical for both models.  This is true for all combinations of parameters (although, as mentioned above, sometimes the $U$ and $M$ is flipped in the mixture model for $L$ small).  In the Beta Record Linkage model, the posterior density of $p_M$ remains rather flat, and the posterior densities for $p_{M\ell}$  look like a $\chi^2$ distribution. 
 
 % MM  ALLparam - posterior densities
 \begin{figure}[h!]
@@ -253,6 +238,31 @@ The posterior densities for $p_{U\ell}$ in Figures \ref{mmLarge} and \ref{bpmLar
 \end{center}
 \end{figure}
 
+
+\subsection{Beta Record Linkage}  Figure \ref{bpmTrace} shows the trace plots for $\params$ and the likelihood of $Z$ from the last 15,000 draws.  It appears that $p_{U\ell}$ mixes well, but that there are slow-moving trends in $p_M, p_{M\ell}$ and the likelihood.  This suggests that the chains have not converged. 
+
+\cite{sadinle_2017} uses Beta Record Linkage with $n_1 = 4,430, n_2 = 1,324$ which gives $5,852,080$ record pairs.  He finds that he has converged after just 2,000 iterations of the Gibbs Sampler based on Geweke's convergence diagnostic as implemented in \texttt{R} package \texttt{coda}.  In future versions of this paper, I will explore how to apply similar functions to my output, or write a custom module that calculates the appropriate convergence criteria from \cite{brooks_gelman_1998} and  \cite{gelman_rubin_1992}.
+
+%bpm - trace plots
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=\textwidth]{../Figures/bpm/nM10/allTrace_nM10_L3.png}
+\caption{Trace plot of draws 85,000-100,000 for $\params$ and the likelihood of $Z$ from a Beta Record Linkage model with true parameters $(L, n_1, n_2, p_M, p_{M\ell}, p_{U\ell}) = (5, 20, 20, 0.5, 0.9, 0.2)$ }
+\label{bpmTrace}
+\end{center}
+\end{figure}
+
+\subsubsection{Matching and matching weights, Posteriors}
+
+% NEED TO LOOK AT THE IMPLIED WEIGHTS FROM THIS MODEL
+
+% figures for nM = 10, dim(Gamma) = 200 pM =0.5, L = 5
+% mm 
+
+\subsection{Posterior Densities}
+The posterior densities for $p_{U\ell}$ in Figures \ref{mmLarge} and \ref{bpmLarge} are virtually identical for both models.  This is true for all combinations of parameters (although, as mentioned above, sometimes the $U$ and $M$ is flipped in the mixture model for $L$ small).  In the Beta Record Linkage model, the posterior density of $p_M$ remains rather flat, and the posterior densities for $p_{M\ell}$  look like a $\chi^2$ distribution. 
+
+
 %bpm - posterior densities
 \begin{figure}[h!]
 \begin{center}
@@ -263,19 +273,6 @@ The posterior densities for $p_{U\ell}$ in Figures \ref{mmLarge} and \ref{bpmLar
 \end{figure}
 
 \subsection{Beta Record Linkage}
-\subsubsection{Convergence}  Figure \ref{bpmTrace} shows the trace plots for $\params$ and the likelihood of $Z$ from the last 15,000 draws.  It appears that $p_{U\ell}$ mixes well, but that there are slow-moving trends in $p_M, p_{M\ell}$ and the likelihood.  This suggests that the chains have not converged. 
-
-\cite{sadinle_2017} uses Beta Record Linkage with $n_1 = 4,430, n_2 = 1,324$ which gives $5,852,080$ record pairs.  He finds that he has converged after just 2,000 iterations of the Gibbs Sampler based on Geweke's convergence diagnostic as implemented in \texttt{R} package \texttt{coda}.  In future versions of this paper, I will explore how to apply similar functions to my output, or write a custom module that calculates the appropriate convergence criteria from \cite{brooks_gelman_1998} and  \cite{gelman_rubin_1992}.
-
-%bpm - trace plots
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[width=\textwidth]{../Figures/bpm/nM10/allTrace_nM10_L3.png}
-\caption{Trace plot of draws 85,000-100,000 for $\params$ and the likelihood of $Z$ from a Beta Record Linkage model with true parameters $(L, n_1, n_2, p_M, p_{M\ell}, p_{U\ell}) = (5, 20, 20, 0.5, 0.9, 0.2)$ }
-\label{bpmTrace}
-\end{center}
-\end{figure}
-
 % z - barplot
 
 \begin{figure}[h!]
